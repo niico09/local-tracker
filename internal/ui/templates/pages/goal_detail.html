@@ -6,7 +6,36 @@
   <dt>Visibility</dt><dd>{{.Goal.Visibility}}</dd>
   {{if .Goal.Target}}<dt>Target</dt><dd>{{.Goal.Target}}</dd>{{end}}
 </dl>
+
+<h2 class="text-lg font-medium">Items</h2>
+{{if .Members}}
+<ul>
+  {{range .Members}}
+  <li>
+    {{if .CoverURL}}<img src="{{.CoverURL}}" alt="" class="h-12 object-cover">{{end}}
+    <a href="/catalog/{{.ID}}">{{.Title}}</a>
+    <span>{{.Kind}}</span>
+    <span>Tilt: {{if .TiltOwner}}personal{{else}}shared{{end}}</span>
+    {{if .HasTilt}}<span>{{.TiltState}}</span>{{end}}
+    {{if $.Goal.Editable}}
+    <form method="post" action="/goals/{{$.Goal.ID}}/items/{{.ID}}/remove"><button type="submit">Remove</button></form>
+    {{end}}
+  </li>
+  {{end}}
+</ul>
+{{else}}
+<p>No items yet.</p>
+{{end}}
+
 {{if .Goal.Editable}}
+{{if .Items}}
+<form method="post" action="/goals/{{.Goal.ID}}/items">
+  <select name="item_id">
+    {{range .Items}}<option value="{{.ID}}">{{.Title}}</option>{{end}}
+  </select>
+  <button type="submit">Add item</button>
+</form>
+{{end}}
 <p><a href="/goals/{{.Goal.ID}}/edit">Edit</a></p>
 <form method="post" action="/goals/{{.Goal.ID}}/visibility">
   <select name="visibility">

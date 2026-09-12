@@ -79,19 +79,21 @@ func (d *DB) Health(ctx context.Context) (journalMode string, foreignKeys int, e
 
 // Repos bundles the domain port implementations on one connection.
 type Repos struct {
-	Users    *UserRepo
-	Sessions *SessionRepo
-	Items    *ItemRepo
-	Goals    *GoalRepo
+	Users      *UserRepo
+	Sessions   *SessionRepo
+	Items      *ItemRepo
+	Goals      *GoalRepo
+	Membership *MembershipRepo
 }
 
 // NewRepos wires the repositories.
 func NewRepos(db *DB) *Repos {
 	return &Repos{
-		Users:    &UserRepo{db: db},
-		Sessions: &SessionRepo{db: db},
-		Items:    &ItemRepo{db: db},
-		Goals:    &GoalRepo{db: db},
+		Users:      &UserRepo{db: db},
+		Sessions:   &SessionRepo{db: db},
+		Items:      &ItemRepo{db: db},
+		Goals:      &GoalRepo{db: db},
+		Membership: &MembershipRepo{db: db},
 	}
 }
 

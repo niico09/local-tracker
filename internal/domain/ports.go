@@ -41,6 +41,16 @@ type ItemRepository interface {
 	Delete(ctx context.Context, a Actor, id ItemID) error
 }
 
+// MembershipRepository persists goal_items links and resolves the per-goal tilt
+// (Rule 1). Every method requires an Actor; authorization is applied to the
+// enclosing goal, so a partner with read-only visibility can list members but
+// may never add or remove one.
+type MembershipRepository interface {
+	Add(ctx context.Context, a Actor, goalID GoalID, itemID ItemID) error
+	Remove(ctx context.Context, a Actor, goalID GoalID, itemID ItemID) error
+	ListMembers(ctx context.Context, a Actor, goalID GoalID) ([]GoalMember, error)
+}
+
 // GoalRepository persists couple and personal goals. Every method requires an
 // Actor so no query can run unscoped and every returned row is authorized
 // centrally; a personal goal with VisibilityShared is readable by the partner

@@ -43,14 +43,16 @@ func newHarness(t *testing.T) *harness {
 	covers := service.NewCoverStore(uploadsDir, 5<<20)
 	catalog := service.NewCatalog(repos.Items, covers)
 	goals := service.NewGoals(repos.Goals)
+	members := service.NewMembership(repos.Membership)
 	handler, err := web.NewServer(web.RouterDeps{
-		Health:    db.Health,
-		Assets:    ui.FS(),
-		Auth:      auth,
-		Catalog:   catalog,
-		Goals:     goals,
-		Covers:    covers,
-		UploadMax: 5 << 20,
+		Health:     db.Health,
+		Assets:     ui.FS(),
+		Auth:       auth,
+		Catalog:    catalog,
+		Goals:      goals,
+		Membership: members,
+		Covers:     covers,
+		UploadMax:  5 << 20,
 	})
 	if err != nil {
 		t.Fatalf("web.NewServer: %v", err)

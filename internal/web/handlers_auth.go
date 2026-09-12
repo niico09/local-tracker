@@ -38,6 +38,7 @@ type pageData struct {
 	Goal         *goalView
 	GoalForm     goalForm
 	Visibilities []domain.Visibility
+	Members      []memberView
 }
 
 func handleSetupGet(auth Auth, tmpls templates) http.HandlerFunc {

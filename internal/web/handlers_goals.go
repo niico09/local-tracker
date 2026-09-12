@@ -143,7 +143,11 @@ func handleGoalCreate(goals Goals, tmpls templates) http.HandlerFunc {
 	}
 }
 
-func handleGoalDetail(goals Goals, tmpls templates) http.HandlerFunc {
+// handleGoalDetail renders one goal, its member items with their resolved tilt
+// owners, and the catalog items the actor may attach. Members are shown to any
+// viewer (a granted partner sees the goal read-only); the add and remove
+// affordances are gated on the single access rule via Goal.Editable.
+func handleGoalDetail(goals Goals, members Membership, cat Catalog, tmpls templates) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, ok := goalID(r)
 		if !ok {
@@ -157,7 +161,29 @@ func handleGoalDetail(goals Goals, tmpls templates) http.HandlerFunc {
 			return
 		}
 		v := toGoalView(a, goal)
-		render(w, tmpls, "goal_detail", http.StatusOK, pageData{Title: goal.Title, Goal: &v})
+		data := pageData{Title: goal.Title, Goal: &v}
+
+		if members != nil {
+			list, err := members.ListMembers(r.Context(), a, id)
+			if err != nil {
+				fail(w, r, err)
+				return
+			}
+			for _, m := range list {
+				data.Members = append(data.Members, toMemberView(m))
+			}
+		}
+		if v.Editable && cat != nil {
+			items, err := cat.List(r.Context(), a)
+			if err != nil {
+				fail(w, r, err)
+				return
+			}
+			for _, it := range items {
+				data.Items = append(data.Items, toView(it))
+			}
+		}
+		render(w, tmpls, "goal_detail", http.StatusOK, data)
 	}
 }
 

@@ -12,13 +12,14 @@ import (
 // RouterDeps carries the collaborators the HTTP layer needs. Health is a
 // function rather than a storage type so web keeps no dependency on storage.
 type RouterDeps struct {
-	Health    func(ctx context.Context) (journalMode string, foreignKeys int, err error)
-	Assets    fs.FS
-	Auth      Auth
-	Catalog   Catalog
-	Goals     Goals
-	Covers    CoverFiles
-	UploadMax int64
+	Health     func(ctx context.Context) (journalMode string, foreignKeys int, err error)
+	Assets     fs.FS
+	Auth       Auth
+	Catalog    Catalog
+	Goals      Goals
+	Membership Membership
+	Covers     CoverFiles
+	UploadMax  int64
 }
 
 // healthResponse is the JSON shape returned by GET /healthz.
@@ -84,11 +85,15 @@ func NewServer(deps RouterDeps) (http.Handler, error) {
 		mux.HandleFunc("POST /goals", handleGoalCreate(deps.Goals, tmpls))
 		mux.HandleFunc("GET /goals/new", handleGoalNew(tmpls))
 		mux.HandleFunc("POST /goals/new", handleGoalCreate(deps.Goals, tmpls))
-		mux.HandleFunc("GET /goals/{id}", handleGoalDetail(deps.Goals, tmpls))
+		mux.HandleFunc("GET /goals/{id}", handleGoalDetail(deps.Goals, deps.Membership, deps.Catalog, tmpls))
 		mux.HandleFunc("GET /goals/{id}/edit", handleGoalEdit(deps.Goals, tmpls))
 		mux.HandleFunc("POST /goals/{id}/edit", handleGoalUpdate(deps.Goals, tmpls))
 		mux.HandleFunc("POST /goals/{id}/delete", handleGoalDelete(deps.Goals))
 		mux.HandleFunc("POST /goals/{id}/visibility", handleGoalVisibility(deps.Goals))
+		if deps.Membership != nil {
+			mux.HandleFunc("POST /goals/{id}/items", handleMembershipAdd(deps.Membership))
+			mux.HandleFunc("POST /goals/{id}/items/{itemID}/remove", handleMembershipRemove(deps.Membership))
+		}
 	}
 
 	return Chain(mux,

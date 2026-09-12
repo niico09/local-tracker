@@ -54,14 +54,16 @@ func run(args []string) error {
 	covers := service.NewCoverStore(filepath.Join(cfg.DataDir, "uploads"), cfg.UploadMax)
 	catalog := service.NewCatalog(repos.Items, covers)
 	goals := service.NewGoals(repos.Goals)
+	members := service.NewMembership(repos.Membership)
 	handler, err := web.NewServer(web.RouterDeps{
-		Health:    db.Health,
-		Assets:    ui.FS(),
-		Auth:      auth,
-		Catalog:   catalog,
-		Goals:     goals,
-		Covers:    covers,
-		UploadMax: cfg.UploadMax,
+		Health:     db.Health,
+		Assets:     ui.FS(),
+		Auth:       auth,
+		Catalog:    catalog,
+		Goals:      goals,
+		Membership: members,
+		Covers:     covers,
+		UploadMax:  cfg.UploadMax,
 	})
 	if err != nil {
 		return err
