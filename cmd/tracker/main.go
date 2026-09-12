@@ -4,15 +4,16 @@ package main
 import (
 	"context"
 	"errors"
-	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"syscall"
 	"time"
 
+	"local-tracker/internal/config"
+	"local-tracker/internal/service"
 	"local-tracker/internal/storage"
 	"local-tracker/internal/ui"
 	"local-tracker/internal/web"
@@ -24,36 +25,39 @@ func main() {
 	}
 }
 
-// run wires the SQLite store and HTTP router, then serves until SIGINT/SIGTERM
-// triggers a graceful shutdown.
+// run wires config, SQLite, the auth service and the HTTP server, then serves
+// until SIGINT/SIGTERM triggers a graceful shutdown.
 func run(args []string) error {
-	if len(args) > 0 && args[0] == "serve" {
-		args = args[1:]
-	}
-
-	fs := flag.NewFlagSet("tracker", flag.ContinueOnError)
-	addr := fs.String("addr", envOr("TRACKER_ADDR", "0.0.0.0:8080"), "listen address")
-	dataDir := fs.String("data", envOr("TRACKER_DATA", "./data"), "data directory")
-	dbOverride := fs.String("db", "", "database path (defaults to <data>/tracker.db)")
-	if err := fs.Parse(args); err != nil {
+	cfg, err := config.Load(args)
+	if err != nil {
 		return err
 	}
-	dbPath := *dbOverride
-	if dbPath == "" {
-		dbPath = filepath.Join(*dataDir, "tracker.db")
+	switch cfg.Command {
+	case "serve":
+	case "seed", "backup":
+		return fmt.Errorf("command %q is not implemented until slice S6", cfg.Command)
+	default:
+		return fmt.Errorf("unknown command %q", cfg.Command)
 	}
 
 	ctx := context.Background()
-	db, err := storage.Open(ctx, dbPath)
+	db, err := storage.Open(ctx, cfg.DBPath)
 	if err != nil {
 		return err
 	}
 	defer db.Close()
-	log.Printf("sqlite ready at %s (journal_mode=wal, foreign_keys=1)", dbPath)
+	log.Printf("sqlite ready at %s (journal_mode=wal, foreign_keys=1)", cfg.DBPath)
+
+	repos := storage.NewRepos(db)
+	auth := service.NewAuth(repos.Users, repos.Sessions, cfg.SessionTTL)
+	handler, err := web.NewServer(web.RouterDeps{Health: db.Health, Assets: ui.FS(), Auth: auth})
+	if err != nil {
+		return err
+	}
 
 	srv := &http.Server{
-		Addr:              *addr,
-		Handler:           web.NewRouter(web.RouterDeps{Health: db.Health, Assets: ui.FS()}),
+		Addr:              cfg.Addr,
+		Handler:           handler,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
@@ -62,7 +66,7 @@ func run(args []string) error {
 
 	errCh := make(chan error, 1)
 	go func() {
-		log.Printf("listening on %s", *addr)
+		log.Printf("listening on %s", cfg.Addr)
 		errCh <- srv.ListenAndServe()
 	}()
 
@@ -78,11 +82,4 @@ func run(args []string) error {
 		defer cancel()
 		return srv.Shutdown(shutdown)
 	}
-}
-
-func envOr(key, fallback string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	return fallback
 }

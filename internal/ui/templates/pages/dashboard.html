@@ -1,0 +1,5 @@
+{{define "content"}}
+<h1 class="text-xl font-semibold">Dashboard</h1>
+<p>Signed in as user {{.UserID}}.</p>
+<form method="post" action="/logout"><button type="submit">Sign out</button></form>
+{{end}}

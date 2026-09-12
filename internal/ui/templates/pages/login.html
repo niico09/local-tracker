@@ -1,0 +1,9 @@
+{{define "content"}}
+<h1 class="text-xl font-semibold">Sign in</h1>
+{{if .Error}}<p class="text-red-400">{{.Error}}</p>{{end}}
+<form class="flex flex-col gap-3" method="post" action="/login">
+  <input name="name" placeholder="Name" required>
+  <input name="pin" type="password" inputmode="numeric" minlength="4" maxlength="12" placeholder="PIN" required>
+  <button type="submit">Sign in</button>
+</form>
+{{end}}

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io/fs"
 	"net/http"
+	"time"
 )
 
 // RouterDeps carries the collaborators the HTTP layer needs. Health is a
@@ -13,6 +14,7 @@ import (
 type RouterDeps struct {
 	Health func(ctx context.Context) (journalMode string, foreignKeys int, err error)
 	Assets fs.FS
+	Auth   Auth
 }
 
 // healthResponse is the JSON shape returned by GET /healthz.
@@ -35,6 +37,34 @@ func NewRouter(deps RouterDeps) *http.ServeMux {
 		}
 	}
 	return mux
+}
+
+// NewServer builds the full HTTP handler: the base router plus the S1 auth
+// routes, wrapped in the mandated middleware chain.
+func NewServer(deps RouterDeps) (http.Handler, error) {
+	mux := NewRouter(deps)
+	tmpls, err := parseTemplates(deps.Assets)
+	if err != nil {
+		return nil, err
+	}
+	limiter := newRateLimiter(5, 15*time.Minute)
+
+	mux.HandleFunc("GET /setup", handleSetupGet(deps.Auth, tmpls))
+	mux.HandleFunc("POST /setup", handleSetupPost(deps.Auth, tmpls))
+	mux.HandleFunc("GET /login", handleLoginGet(tmpls))
+	mux.HandleFunc("POST /login", handleLoginPost(deps.Auth, limiter, tmpls))
+	mux.HandleFunc("POST /logout", handleLogout(deps.Auth))
+	mux.HandleFunc("GET /", handleDashboard(tmpls))
+
+	return Chain(mux,
+		Recover,
+		Logging,
+		SecurityHeaders,
+		SameOrigin,
+		func(next http.Handler) http.Handler { return SetupGate(deps.Auth, next) },
+		func(next http.Handler) http.Handler { return Authenticate(deps.Auth, next) },
+		RequireAuth,
+	), nil
 }
 
 // handleHealth reports the live SQLite pragma state; it returns 200 only when
