@@ -44,6 +44,7 @@ func newHarness(t *testing.T) *harness {
 	catalog := service.NewCatalog(repos.Items, covers)
 	goals := service.NewGoals(repos.Goals)
 	members := service.NewMembership(repos.Membership)
+	progress := service.NewProgress(repos.Progress)
 	handler, err := web.NewServer(web.RouterDeps{
 		Health:     db.Health,
 		Assets:     ui.FS(),
@@ -51,6 +52,7 @@ func newHarness(t *testing.T) *harness {
 		Catalog:    catalog,
 		Goals:      goals,
 		Membership: members,
+		Progress:   progress,
 		Covers:     covers,
 		UploadMax:  5 << 20,
 	})

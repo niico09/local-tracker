@@ -7,6 +7,8 @@
   {{if .Goal.Target}}<dt>Target</dt><dd>{{.Goal.Target}}</dd>{{end}}
 </dl>
 
+{{if .Rollup}}<p>Progress: {{.Rollup.Done}}/{{.Rollup.Total}}</p>{{end}}
+
 <h2 class="text-lg font-medium">Items</h2>
 {{if .Members}}
 <ul>
@@ -18,6 +20,17 @@
     <span>Tilt: {{if .TiltOwner}}personal{{else}}shared{{end}}</span>
     {{if .HasTilt}}<span>{{.TiltState}}</span>{{end}}
     {{if $.Goal.Editable}}
+    <form method="post" action="/progress/{{.ID}}/toggle">
+      <input type="hidden" name="goal_id" value="{{$.Goal.ID}}">
+      <button type="submit">Toggle</button>
+    </form>
+    <form method="post" action="/progress/{{.ID}}/dates">
+      <input type="hidden" name="goal_id" value="{{$.Goal.ID}}">
+      <input type="date" name="start" value="{{.StartDate}}">
+      <input type="date" name="end" value="{{.EndDate}}">
+      <label><input type="checkbox" name="done"{{if .Done}} checked{{end}}> done</label>
+      <button type="submit">Save dates</button>
+    </form>
     <form method="post" action="/goals/{{$.Goal.ID}}/items/{{.ID}}/remove"><button type="submit">Remove</button></form>
     {{end}}
   </li>

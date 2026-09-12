@@ -28,6 +28,9 @@ type memberView struct {
 	TiltOwner domain.UserID // 0 = shared couple tilt
 	TiltState domain.State
 	HasTilt   bool
+	Done      bool
+	StartDate string
+	EndDate   string
 }
 
 // toMemberView decorates a goal member for the template. User data is only ever
@@ -46,6 +49,13 @@ func toMemberView(m domain.GoalMember) memberView {
 	if m.Tilt != nil {
 		v.HasTilt = true
 		v.TiltState = domain.DeriveState(*m.Tilt)
+		v.Done = m.Tilt.Done
+		if m.Tilt.StartDate != nil {
+			v.StartDate = m.Tilt.StartDate.String()
+		}
+		if m.Tilt.EndDate != nil {
+			v.EndDate = m.Tilt.EndDate.String()
+		}
 	}
 	return v
 }

@@ -39,6 +39,8 @@ type pageData struct {
 	GoalForm     goalForm
 	Visibilities []domain.Visibility
 	Members      []memberView
+	Rollup       *rollupView
+	Tilt         *tiltView
 }
 
 func handleSetupGet(auth Auth, tmpls templates) http.HandlerFunc {
@@ -161,13 +163,19 @@ func clientIP(r *http.Request) string {
 type templates map[string]*template.Template
 
 // parseTemplates parses base.html plus each page separately so every page can
-// define its own "content" block without name collisions.
+// define its own "content" block without name collisions. The two HTMX fragment
+// pages also parse the partials they render.
 func parseTemplates(assets fs.FS) (templates, error) {
 	pages := []string{"setup", "login", "dashboard", "catalog_list", "catalog_detail", "catalog_new", "catalog_edit",
-		"goals_list", "goal_detail", "goal_new", "goal_edit"}
+		"goals_list", "goal_detail", "goal_new", "goal_edit", "goal_progress", "catalog_tilt"}
+	fragments := map[string]bool{"goal_progress": true, "catalog_tilt": true}
 	out := make(templates, len(pages))
 	for _, name := range pages {
-		t, err := template.ParseFS(assets, "templates/base.html", "templates/pages/"+name+".html")
+		files := []string{"templates/base.html", "templates/pages/" + name + ".html"}
+		if fragments[name] {
+			files = append(files, "templates/partials/progress.html")
+		}
+		t, err := template.ParseFS(assets, files...)
 		if err != nil {
 			return nil, err
 		}
@@ -186,5 +194,25 @@ func render(w http.ResponseWriter, tmpls templates, name string, status int, dat
 	w.WriteHeader(status)
 	if err := t.ExecuteTemplate(w, "layout", data); err != nil {
 		log.Printf("render %s: %v", name, err)
+	}
+}
+
+// renderFragment executes only the named fragment when the request came from
+// HTMX, and the full page (the fragment's own page template under the layout)
+// otherwise. html/template autoescaping is never bypassed.
+func renderFragment(w http.ResponseWriter, r *http.Request, tmpls templates, page, fragment string, status int, data pageData) {
+	t, ok := tmpls[page]
+	if !ok {
+		http.Error(w, "template missing", http.StatusInternalServerError)
+		return
+	}
+	target := "layout"
+	if r.Header.Get("HX-Request") == "true" {
+		target = fragment
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(status)
+	if err := t.ExecuteTemplate(w, target, data); err != nil {
+		log.Printf("render %s/%s: %v", page, target, err)
 	}
 }

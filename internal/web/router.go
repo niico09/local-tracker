@@ -18,6 +18,7 @@ type RouterDeps struct {
 	Catalog    Catalog
 	Goals      Goals
 	Membership Membership
+	Progress   Progress
 	Covers     CoverFiles
 	UploadMax  int64
 }
@@ -94,6 +95,15 @@ func NewServer(deps RouterDeps) (http.Handler, error) {
 			mux.HandleFunc("POST /goals/{id}/items", handleMembershipAdd(deps.Membership))
 			mux.HandleFunc("POST /goals/{id}/items/{itemID}/remove", handleMembershipRemove(deps.Membership))
 		}
+	}
+
+	// Progress routes: the tilt mutations degrade to 303 without HTMX, and the
+	// two GET endpoints serve a fragment to HTMX or the full page otherwise.
+	if deps.Progress != nil {
+		mux.HandleFunc("POST /progress/{itemID}/toggle", handleProgressToggle(deps.Progress, tmpls))
+		mux.HandleFunc("POST /progress/{itemID}/dates", handleProgressDates(deps.Progress, tmpls))
+		mux.HandleFunc("GET /goals/{id}/progress", handleGoalProgress(deps.Progress, tmpls))
+		mux.HandleFunc("GET /catalog/{id}/tilt", handleCatalogTilt(deps.Progress, tmpls))
 	}
 
 	return Chain(mux,

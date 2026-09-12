@@ -84,6 +84,7 @@ type Repos struct {
 	Items      *ItemRepo
 	Goals      *GoalRepo
 	Membership *MembershipRepo
+	Progress   *ProgressRepo
 }
 
 // NewRepos wires the repositories.
@@ -94,6 +95,7 @@ func NewRepos(db *DB) *Repos {
 		Items:      &ItemRepo{db: db},
 		Goals:      &GoalRepo{db: db},
 		Membership: &MembershipRepo{db: db},
+		Progress:   &ProgressRepo{db: db},
 	}
 }
 

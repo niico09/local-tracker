@@ -1,0 +1,2 @@
+{{define "progress_goal"}}<div id="goal-progress" class="text-sm text-slate-300">{{if .Rollup}}{{.Rollup.Done}}/{{.Rollup.Total}}{{else}}0/0{{end}}</div>{{end}}
+{{define "progress_tilt"}}<div id="item-tilt" class="text-sm text-slate-300">{{if .Tilt}}{{.Tilt.State}} ({{if .Tilt.Owner}}personal{{else}}shared{{end}}){{end}}</div>{{end}}

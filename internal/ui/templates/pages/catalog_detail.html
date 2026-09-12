@@ -11,7 +11,9 @@
   <input type="file" name="cover" accept="image/*" required>
   <button type="submit">Upload cover</button>
 </form>
+<form method="post" action="/progress/{{.Item.ID}}/toggle"><button type="submit">Toggle tilt</button></form>
 <p class="flex gap-3">
+  <a href="/catalog/{{.Item.ID}}/tilt">Tilt</a>
   <a href="/catalog/{{.Item.ID}}/edit">Edit</a>
   <a href="/catalog">Back to catalog</a>
 </p>

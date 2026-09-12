@@ -63,3 +63,18 @@ func ValidateDates(start, end *Date) error {
 	}
 	return nil
 }
+
+// Rollup computes the display numbers for a goal (G3/I8): the denominator is
+// the goal's target when one is set, otherwise the current member count. A done
+// count above the denominator is clamped so a display never reads e.g. 105/100.
+func Rollup(target *int, memberDone, memberCount int) (done, total int) {
+	total = memberCount
+	if target != nil {
+		total = *target
+	}
+	done = memberDone
+	if done > total {
+		done = total
+	}
+	return done, total
+}

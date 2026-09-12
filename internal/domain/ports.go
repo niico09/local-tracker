@@ -63,3 +63,20 @@ type GoalRepository interface {
 	SetVisibility(ctx context.Context, a Actor, id GoalID, v Visibility) error
 	Delete(ctx context.Context, a Actor, id GoalID) error
 }
+
+// ProgressRepository persists the per-(item, owner) tilts. Every method requires
+// an Actor and derives the written owner server-side, never from the client:
+// inside a goal the goal owner rules (Rule 1) and standalone the item owner
+// applies (G5). goalID 0 selects the standalone tilt. Authorization runs on the
+// enclosing resource (the goal or the item), so a granted partner may read a
+// personal goal's tilt but never change it.
+type ProgressRepository interface {
+	// Tilt returns the resolved tilt for an item. An absent row is a pending
+	// tilt carrying the resolved owner rather than ErrNotFound.
+	Tilt(ctx context.Context, a Actor, goalID GoalID, itemID ItemID) (Progress, error)
+	// SetTilt upserts a tilt after validating end >= start.
+	SetTilt(ctx context.Context, a Actor, goalID GoalID, p Progress) (Progress, error)
+	// GoalRollup counts the goal's member items and done tilts, then applies the
+	// target-else-member-count denominator via Rollup.
+	GoalRollup(ctx context.Context, a Actor, goalID GoalID) (done, total int, err error)
+}

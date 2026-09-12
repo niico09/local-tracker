@@ -169,9 +169,15 @@ func handleGoalDetail(goals Goals, members Membership, cat Catalog, tmpls templa
 				fail(w, r, err)
 				return
 			}
+			memberDone := 0
 			for _, m := range list {
 				data.Members = append(data.Members, toMemberView(m))
+				if m.Tilt != nil && m.Tilt.Done {
+					memberDone++
+				}
 			}
+			done, total := domain.Rollup(goal.Target, memberDone, len(list))
+			data.Rollup = &rollupView{Done: done, Total: total}
 		}
 		if v.Editable && cat != nil {
 			items, err := cat.List(r.Context(), a)
