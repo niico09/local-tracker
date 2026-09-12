@@ -1,0 +1,9 @@
+# SDD / agent tooling
+.atl/
+
+# Runtime data (SQLite DB + uploaded cover images)
+data/
+
+# Local build output
+/bin/
+/tracker
