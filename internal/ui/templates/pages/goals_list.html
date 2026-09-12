@@ -1,0 +1,17 @@
+{{define "content"}}
+<h1 class="text-xl font-semibold">Goals</h1>
+{{if .Error}}<p class="text-red-400">{{.Error}}</p>{{end}}
+<p><a href="/goals/new">Add goal</a></p>
+<ul class="flex flex-col gap-3">
+{{range .Goals}}
+  <li class="flex items-center gap-3">
+    <a href="/goals/{{.ID}}">{{.Title}}</a>
+    <span>{{if .OwnerUserID}}personal{{else}}couple{{end}}</span>
+    <span>{{.Visibility}}</span>
+    {{if .Target}}<span>target {{.Target}}</span>{{end}}
+  </li>
+{{else}}
+  <li>No goals yet.</li>
+{{end}}
+</ul>
+{{end}}

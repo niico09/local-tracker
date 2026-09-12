@@ -16,6 +16,7 @@ type RouterDeps struct {
 	Assets    fs.FS
 	Auth      Auth
 	Catalog   Catalog
+	Goals     Goals
 	Covers    CoverFiles
 	UploadMax int64
 }
@@ -74,6 +75,20 @@ func NewServer(deps RouterDeps) (http.Handler, error) {
 	}
 	if deps.Covers != nil {
 		mux.HandleFunc("GET /uploads/{name}", handleUploads(deps.Covers))
+	}
+
+	// Goal routes. GET /goals/new is a literal pattern and therefore wins over
+	// GET /goals/{id} by ServeMux specificity regardless of order.
+	if deps.Goals != nil {
+		mux.HandleFunc("GET /goals", handleGoalList(deps.Goals, tmpls))
+		mux.HandleFunc("POST /goals", handleGoalCreate(deps.Goals, tmpls))
+		mux.HandleFunc("GET /goals/new", handleGoalNew(tmpls))
+		mux.HandleFunc("POST /goals/new", handleGoalCreate(deps.Goals, tmpls))
+		mux.HandleFunc("GET /goals/{id}", handleGoalDetail(deps.Goals, tmpls))
+		mux.HandleFunc("GET /goals/{id}/edit", handleGoalEdit(deps.Goals, tmpls))
+		mux.HandleFunc("POST /goals/{id}/edit", handleGoalUpdate(deps.Goals, tmpls))
+		mux.HandleFunc("POST /goals/{id}/delete", handleGoalDelete(deps.Goals))
+		mux.HandleFunc("POST /goals/{id}/visibility", handleGoalVisibility(deps.Goals))
 	}
 
 	return Chain(mux,

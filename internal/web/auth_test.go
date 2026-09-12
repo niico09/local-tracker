@@ -42,11 +42,13 @@ func newHarness(t *testing.T) *harness {
 	uploadsDir := filepath.Join(dataDir, "uploads")
 	covers := service.NewCoverStore(uploadsDir, 5<<20)
 	catalog := service.NewCatalog(repos.Items, covers)
+	goals := service.NewGoals(repos.Goals)
 	handler, err := web.NewServer(web.RouterDeps{
 		Health:    db.Health,
 		Assets:    ui.FS(),
 		Auth:      auth,
 		Catalog:   catalog,
+		Goals:     goals,
 		Covers:    covers,
 		UploadMax: 5 << 20,
 	})

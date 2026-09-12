@@ -40,3 +40,16 @@ type ItemRepository interface {
 	SetCover(ctx context.Context, a Actor, id ItemID, coverPath string) error
 	Delete(ctx context.Context, a Actor, id ItemID) error
 }
+
+// GoalRepository persists couple and personal goals. Every method requires an
+// Actor so no query can run unscoped and every returned row is authorized
+// centrally; a personal goal with VisibilityShared is readable by the partner
+// but only the owner may modify it.
+type GoalRepository interface {
+	List(ctx context.Context, a Actor) ([]Goal, error)
+	Get(ctx context.Context, a Actor, id GoalID) (Goal, error)
+	Create(ctx context.Context, a Actor, g Goal) (Goal, error)
+	Update(ctx context.Context, a Actor, g Goal) error
+	SetVisibility(ctx context.Context, a Actor, id GoalID, v Visibility) error
+	Delete(ctx context.Context, a Actor, id GoalID) error
+}

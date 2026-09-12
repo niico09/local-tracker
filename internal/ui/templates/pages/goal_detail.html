@@ -1,0 +1,21 @@
+{{define "content"}}
+{{if .Error}}<p class="text-red-400">{{.Error}}</p>{{end}}
+<h1 class="text-xl font-semibold">{{.Goal.Title}}</h1>
+<dl>
+  <dt>Scope</dt><dd>{{if .Goal.OwnerUserID}}personal{{else}}couple{{end}}</dd>
+  <dt>Visibility</dt><dd>{{.Goal.Visibility}}</dd>
+  {{if .Goal.Target}}<dt>Target</dt><dd>{{.Goal.Target}}</dd>{{end}}
+</dl>
+{{if .Goal.Editable}}
+<p><a href="/goals/{{.Goal.ID}}/edit">Edit</a></p>
+<form method="post" action="/goals/{{.Goal.ID}}/visibility">
+  <select name="visibility">
+    <option value="private"{{if eq .Goal.Visibility "private"}} selected{{end}}>private</option>
+    <option value="shared"{{if eq .Goal.Visibility "shared"}} selected{{end}}>shared</option>
+  </select>
+  <button type="submit">Update visibility</button>
+</form>
+<form method="post" action="/goals/{{.Goal.ID}}/delete"><button type="submit">Delete</button></form>
+{{end}}
+<p><a href="/goals">Back to goals</a></p>
+{{end}}

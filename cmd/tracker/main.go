@@ -53,11 +53,13 @@ func run(args []string) error {
 	auth := service.NewAuth(repos.Users, repos.Sessions, cfg.SessionTTL)
 	covers := service.NewCoverStore(filepath.Join(cfg.DataDir, "uploads"), cfg.UploadMax)
 	catalog := service.NewCatalog(repos.Items, covers)
+	goals := service.NewGoals(repos.Goals)
 	handler, err := web.NewServer(web.RouterDeps{
 		Health:    db.Health,
 		Assets:    ui.FS(),
 		Auth:      auth,
 		Catalog:   catalog,
+		Goals:     goals,
 		Covers:    covers,
 		UploadMax: cfg.UploadMax,
 	})
