@@ -8,6 +8,7 @@
   </select>
   <input name="year" inputmode="numeric" placeholder="Year (optional)" value="{{.Form.Year}}">
   <input name="external_id" placeholder="External id (optional)" value="{{.Form.ExternalID}}">
+  <label class="flex items-center gap-2"><input type="checkbox" name="personal" value="1"{{if .Form.Personal}} checked{{end}}> Personal (only I can see it)</label>
   <button type="submit">Save changes</button>
 </form>
 <p><a href="/catalog/{{.Item.ID}}">Cancel</a></p>

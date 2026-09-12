@@ -9,12 +9,13 @@ import (
 )
 
 // ItemInput is the validated user input for creating or updating an item.
+// Personal marks the item as owned by the acting user; otherwise it is shared.
 type ItemInput struct {
-	Title       string
-	Kind        domain.Kind
-	Year        *int
-	ExternalID  string
-	OwnerUserID domain.UserID
+	Title      string
+	Kind       domain.Kind
+	Year       *int
+	ExternalID string
+	Personal   bool
 }
 
 // CatalogService implements the catalog use cases on top of the item port.
@@ -48,8 +49,8 @@ func (s *CatalogService) Create(ctx context.Context, a domain.Actor, in ItemInpu
 	return s.items.Create(ctx, a, item)
 }
 
-// Update validates input and applies it to an existing item. Ownership and the
-// cover are preserved: editing never reassigns an item or drops its cover.
+// Update validates input and applies it to an existing item. The cover is
+// preserved; ownership follows the actor's personal/shared intent.
 func (s *CatalogService) Update(ctx context.Context, a domain.Actor, id domain.ItemID, in ItemInput) (domain.Item, error) {
 	current, err := s.items.Get(ctx, a, id)
 	if err != nil {
@@ -61,7 +62,6 @@ func (s *CatalogService) Update(ctx context.Context, a domain.Actor, id domain.I
 	}
 	item.ID = current.ID
 	item.CoverPath = current.CoverPath
-	item.OwnerUserID = current.OwnerUserID
 	if err := s.items.Update(ctx, a, item); err != nil {
 		return domain.Item{}, err
 	}
@@ -121,11 +121,15 @@ func validateItem(a domain.Actor, in ItemInput) (domain.Item, error) {
 	if in.Year != nil && (*in.Year < 1000 || *in.Year > 9999) {
 		return domain.Item{}, fmt.Errorf("%w: year must be between 1000 and 9999", domain.ErrValidation)
 	}
+	owner := domain.UserID(0)
+	if in.Personal {
+		owner = a.ID()
+	}
 	return domain.Item{
 		Title:       title,
 		Kind:        in.Kind,
 		Year:        in.Year,
 		ExternalID:  strings.TrimSpace(in.ExternalID),
-		OwnerUserID: in.OwnerUserID,
+		OwnerUserID: owner,
 	}, nil
 }

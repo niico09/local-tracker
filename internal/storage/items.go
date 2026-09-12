@@ -54,8 +54,8 @@ func (r *ItemRepo) Update(ctx context.Context, a domain.Actor, it domain.Item) e
 		return err
 	}
 	_, err = r.db.write(ctx, a, current.Subject(), domain.ActionModify,
-		"UPDATE items SET title=?, kind=?, year=?, external_id=?, updated_at=? WHERE id=?",
-		it.Title, string(it.Kind), nullInt(it.Year), nullString(it.ExternalID),
+		"UPDATE items SET title=?, kind=?, year=?, external_id=?, owner_user_id=?, updated_at=? WHERE id=?",
+		it.Title, string(it.Kind), nullInt(it.Year), nullString(it.ExternalID), nullUser(it.OwnerUserID),
 		formatTime(time.Now().UTC()), int64(it.ID))
 	return err
 }

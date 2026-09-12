@@ -42,6 +42,7 @@ type itemForm struct {
 	Kind       domain.Kind
 	Year       string
 	ExternalID string
+	Personal   bool
 }
 
 func toView(it domain.Item) itemView {
@@ -58,6 +59,7 @@ func formFrom(r *http.Request) itemForm {
 		Kind:       domain.Kind(r.FormValue("kind")),
 		Year:       r.FormValue("year"),
 		ExternalID: r.FormValue("external_id"),
+		Personal:   r.FormValue("personal") != "",
 	}
 }
 
@@ -121,7 +123,7 @@ func handleCatalogCreate(cat Catalog, tmpls templates) http.HandlerFunc {
 			return
 		}
 		item, err := cat.Create(r.Context(), actorOf(r), service.ItemInput{
-			Title: form.Title, Kind: form.Kind, Year: year, ExternalID: form.ExternalID,
+			Title: form.Title, Kind: form.Kind, Year: year, ExternalID: form.ExternalID, Personal: form.Personal,
 		})
 		if err != nil {
 			if errors.Is(err, domain.ErrValidation) {
@@ -165,7 +167,7 @@ func handleCatalogEdit(cat Catalog, tmpls templates) http.HandlerFunc {
 			fail(w, r, err)
 			return
 		}
-		form := itemForm{Title: item.Title, Kind: item.Kind, ExternalID: item.ExternalID}
+		form := itemForm{Title: item.Title, Kind: item.Kind, ExternalID: item.ExternalID, Personal: item.OwnerUserID != 0}
 		if item.Year != nil {
 			form.Year = strconv.Itoa(*item.Year)
 		}
@@ -190,7 +192,7 @@ func handleCatalogUpdate(cat Catalog, tmpls templates) http.HandlerFunc {
 			return
 		}
 		item, err := cat.Update(r.Context(), actorOf(r), id, service.ItemInput{
-			Title: form.Title, Kind: form.Kind, Year: year, ExternalID: form.ExternalID,
+			Title: form.Title, Kind: form.Kind, Year: year, ExternalID: form.ExternalID, Personal: form.Personal,
 		})
 		if err != nil {
 			if errors.Is(err, domain.ErrValidation) {

@@ -225,6 +225,33 @@ func TestProgressStandaloneSharedDefault(t *testing.T) {
 	}
 }
 
+// TestProgressStandalonePersonalOwner covers Rule 4's personal branch: a
+// standalone item owned by A records its tilt under A, and B cannot change it.
+func TestProgressStandalonePersonalOwner(t *testing.T) {
+	ctx := context.Background()
+	repos := testRepos(t)
+	seedUsers(t, repos)
+	ownerA := domain.NewActor(1)
+	partnerB := domain.NewActor(2)
+
+	personal := sampleItem("Ada private")
+	personal.OwnerUserID = 1
+	item, err := repos.Items.Create(ctx, ownerA, personal)
+	if err != nil {
+		t.Fatalf("Create personal item: %v", err)
+	}
+	stored, err := repos.Progress.SetTilt(ctx, ownerA, 0, domain.Progress{ItemID: item.ID, Done: true})
+	if err != nil {
+		t.Fatalf("owner SetTilt: %v", err)
+	}
+	if stored.OwnerUserID != 1 || !stored.Done {
+		t.Fatalf("personal tilt = %+v, want owner 1 done", stored)
+	}
+	if _, err := repos.Progress.SetTilt(ctx, partnerB, 0, domain.Progress{ItemID: item.ID}); !errors.Is(err, domain.ErrForbidden) {
+		t.Fatalf("partner SetTilt = %v, want ErrForbidden", err)
+	}
+}
+
 // TestProgressRule1AndTop100 covers Rules 1 and 2: the same item in a couple goal
 // and a personal goal resolves two independent tilts, the couple goal is one
 // shared advance toward its target, and a granted partner reads but cannot write.
