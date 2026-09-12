@@ -12,9 +12,12 @@ import (
 // RouterDeps carries the collaborators the HTTP layer needs. Health is a
 // function rather than a storage type so web keeps no dependency on storage.
 type RouterDeps struct {
-	Health func(ctx context.Context) (journalMode string, foreignKeys int, err error)
-	Assets fs.FS
-	Auth   Auth
+	Health    func(ctx context.Context) (journalMode string, foreignKeys int, err error)
+	Assets    fs.FS
+	Auth      Auth
+	Catalog   Catalog
+	Covers    CoverFiles
+	UploadMax int64
 }
 
 // healthResponse is the JSON shape returned by GET /healthz.
@@ -55,6 +58,23 @@ func NewServer(deps RouterDeps) (http.Handler, error) {
 	mux.HandleFunc("POST /login", handleLoginPost(deps.Auth, limiter, tmpls))
 	mux.HandleFunc("POST /logout", handleLogout(deps.Auth))
 	mux.HandleFunc("GET /", handleDashboard(tmpls))
+
+	// Catalog routes. GET /catalog/new is a literal pattern and therefore wins
+	// over GET /catalog/{id} by ServeMux specificity regardless of order.
+	if deps.Catalog != nil {
+		mux.HandleFunc("GET /catalog", handleCatalogList(deps.Catalog, tmpls))
+		mux.HandleFunc("POST /catalog", handleCatalogCreate(deps.Catalog, tmpls))
+		mux.HandleFunc("GET /catalog/new", handleCatalogNew(tmpls))
+		mux.HandleFunc("POST /catalog/new", handleCatalogCreate(deps.Catalog, tmpls))
+		mux.HandleFunc("GET /catalog/{id}", handleCatalogDetail(deps.Catalog, tmpls))
+		mux.HandleFunc("GET /catalog/{id}/edit", handleCatalogEdit(deps.Catalog, tmpls))
+		mux.HandleFunc("POST /catalog/{id}/edit", handleCatalogUpdate(deps.Catalog, tmpls))
+		mux.HandleFunc("POST /catalog/{id}/delete", handleCatalogDelete(deps.Catalog))
+		mux.HandleFunc("POST /catalog/{id}/cover", handleCatalogCover(deps.Catalog, deps.UploadMax))
+	}
+	if deps.Covers != nil {
+		mux.HandleFunc("GET /uploads/{name}", handleUploads(deps.Covers))
+	}
 
 	return Chain(mux,
 		Recover,

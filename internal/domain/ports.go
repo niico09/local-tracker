@@ -29,3 +29,14 @@ type SessionRepository interface {
 	Delete(ctx context.Context, a Actor, tokenHash []byte) error
 	DeleteExpired(ctx context.Context, a Actor, now time.Time) (int, error)
 }
+
+// ItemRepository persists the global catalog. Every method requires an Actor so
+// no query can run unscoped and every returned row is authorized centrally.
+type ItemRepository interface {
+	List(ctx context.Context, a Actor) ([]Item, error)
+	Get(ctx context.Context, a Actor, id ItemID) (Item, error)
+	Create(ctx context.Context, a Actor, it Item) (Item, error)
+	Update(ctx context.Context, a Actor, it Item) error
+	SetCover(ctx context.Context, a Actor, id ItemID, coverPath string) error
+	Delete(ctx context.Context, a Actor, id ItemID) error
+}

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -50,7 +51,16 @@ func run(args []string) error {
 
 	repos := storage.NewRepos(db)
 	auth := service.NewAuth(repos.Users, repos.Sessions, cfg.SessionTTL)
-	handler, err := web.NewServer(web.RouterDeps{Health: db.Health, Assets: ui.FS(), Auth: auth})
+	covers := service.NewCoverStore(filepath.Join(cfg.DataDir, "uploads"), cfg.UploadMax)
+	catalog := service.NewCatalog(repos.Items, covers)
+	handler, err := web.NewServer(web.RouterDeps{
+		Health:    db.Health,
+		Assets:    ui.FS(),
+		Auth:      auth,
+		Catalog:   catalog,
+		Covers:    covers,
+		UploadMax: cfg.UploadMax,
+	})
 	if err != nil {
 		return err
 	}

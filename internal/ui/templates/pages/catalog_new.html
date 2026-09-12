@@ -1,0 +1,13 @@
+{{define "content"}}
+<h1 class="text-xl font-semibold">Add item</h1>
+{{if .Error}}<p class="text-red-400">{{.Error}}</p>{{end}}
+<form class="flex flex-col gap-3" method="post" action="/catalog">
+  <input name="title" placeholder="Title" value="{{.Form.Title}}" required>
+  <select name="kind">
+    {{range .Kinds}}<option value="{{.}}"{{if eq . $.Form.Kind}} selected{{end}}>{{.}}</option>{{end}}
+  </select>
+  <input name="year" inputmode="numeric" placeholder="Year (optional)" value="{{.Form.Year}}">
+  <input name="external_id" placeholder="External id (optional)" value="{{.Form.ExternalID}}">
+  <button type="submit">Create item</button>
+</form>
+{{end}}

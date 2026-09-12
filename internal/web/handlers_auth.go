@@ -25,11 +25,15 @@ type Auth interface {
 	SessionTTL() time.Duration
 }
 
-// pageData is the template payload shared by the auth pages.
+// pageData is the template payload shared by every page.
 type pageData struct {
 	Title  string
 	Error  string
 	UserID domain.UserID
+	Items  []itemView
+	Item   *itemView
+	Kinds  []domain.Kind
+	Form   itemForm
 }
 
 func handleSetupGet(auth Auth, tmpls templates) http.HandlerFunc {
@@ -154,7 +158,7 @@ type templates map[string]*template.Template
 // parseTemplates parses base.html plus each page separately so every page can
 // define its own "content" block without name collisions.
 func parseTemplates(assets fs.FS) (templates, error) {
-	pages := []string{"setup", "login", "dashboard"}
+	pages := []string{"setup", "login", "dashboard", "catalog_list", "catalog_detail", "catalog_new", "catalog_edit"}
 	out := make(templates, len(pages))
 	for _, name := range pages {
 		t, err := template.ParseFS(assets, "templates/base.html", "templates/pages/"+name+".html")

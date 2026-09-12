@@ -81,11 +81,16 @@ func (d *DB) Health(ctx context.Context) (journalMode string, foreignKeys int, e
 type Repos struct {
 	Users    *UserRepo
 	Sessions *SessionRepo
+	Items    *ItemRepo
 }
 
 // NewRepos wires the repositories.
 func NewRepos(db *DB) *Repos {
-	return &Repos{Users: &UserRepo{db: db}, Sessions: &SessionRepo{db: db}}
+	return &Repos{
+		Users:    &UserRepo{db: db},
+		Sessions: &SessionRepo{db: db},
+		Items:    &ItemRepo{db: db},
+	}
 }
 
 // read runs a query only when an acting user is present. No actor => no SQL.

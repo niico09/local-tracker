@@ -1,0 +1,16 @@
+{{define "content"}}
+<h1 class="text-xl font-semibold">Catalog</h1>
+{{if .Error}}<p class="text-red-400">{{.Error}}</p>{{end}}
+<p><a href="/catalog/new">Add item</a></p>
+<ul class="flex flex-col gap-3">
+{{range .Items}}
+  <li class="flex items-center gap-3">
+    {{if .CoverURL}}<img src="{{.CoverURL}}" alt="" class="h-16 w-16 object-cover">{{end}}
+    <a href="/catalog/{{.ID}}">{{.Title}}</a>
+    <span>{{.Kind}}{{if .Year}} ({{.Year}}){{end}}</span>
+  </li>
+{{else}}
+  <li>No items yet.</li>
+{{end}}
+</ul>
+{{end}}

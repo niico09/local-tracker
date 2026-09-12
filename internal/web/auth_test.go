@@ -20,15 +20,18 @@ import (
 )
 
 type harness struct {
-	srv    *httptest.Server
-	repos  *storage.Repos
-	client *http.Client
+	srv        *httptest.Server
+	repos      *storage.Repos
+	client     *http.Client
+	covers     *service.CoverStore
+	uploadsDir string
 }
 
 func newHarness(t *testing.T) *harness {
 	t.Helper()
 	ctx := context.Background()
-	db, err := storage.Open(ctx, filepath.Join(t.TempDir(), "tracker.db"))
+	dataDir := t.TempDir()
+	db, err := storage.Open(ctx, filepath.Join(dataDir, "tracker.db"))
 	if err != nil {
 		t.Fatalf("storage.Open: %v", err)
 	}
@@ -36,7 +39,17 @@ func newHarness(t *testing.T) *harness {
 
 	repos := storage.NewRepos(db)
 	auth := service.NewAuth(repos.Users, repos.Sessions, time.Hour)
-	handler, err := web.NewServer(web.RouterDeps{Health: db.Health, Assets: ui.FS(), Auth: auth})
+	uploadsDir := filepath.Join(dataDir, "uploads")
+	covers := service.NewCoverStore(uploadsDir, 5<<20)
+	catalog := service.NewCatalog(repos.Items, covers)
+	handler, err := web.NewServer(web.RouterDeps{
+		Health:    db.Health,
+		Assets:    ui.FS(),
+		Auth:      auth,
+		Catalog:   catalog,
+		Covers:    covers,
+		UploadMax: 5 << 20,
+	})
 	if err != nil {
 		t.Fatalf("web.NewServer: %v", err)
 	}
@@ -51,7 +64,7 @@ func newHarness(t *testing.T) *harness {
 		Jar:           jar,
 		CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse },
 	}
-	return &harness{srv: srv, repos: repos, client: client}
+	return &harness{srv: srv, repos: repos, client: client, covers: covers, uploadsDir: uploadsDir}
 }
 
 func (h *harness) do(t *testing.T, method, path string, form url.Values) *http.Response {

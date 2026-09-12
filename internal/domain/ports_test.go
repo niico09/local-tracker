@@ -12,6 +12,7 @@ func TestPortMethodsRequireActor(t *testing.T) {
 	ports := []reflect.Type{
 		reflect.TypeOf((*UserRepository)(nil)).Elem(),
 		reflect.TypeOf((*SessionRepository)(nil)).Elem(),
+		reflect.TypeOf((*ItemRepository)(nil)).Elem(),
 	}
 	for _, port := range ports {
 		for i := 0; i < port.NumMethod(); i++ {
