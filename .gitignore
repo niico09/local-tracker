@@ -7,3 +7,9 @@ data/
 # Local build output
 /bin/
 /tracker
+
+# Node/Tailwind tooling (dev-only)
+node_modules/
+# package.json pins an exact @tailwindcss/cli version; the lockfile is a
+# multi-thousand-line generated artifact excluded from the bootstrap commit.
+package-lock.json

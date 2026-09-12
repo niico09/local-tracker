@@ -1,0 +1,21 @@
+{{define "content"}}
+{{if .Error}}<p class="text-red-400">{{.Error}}</p>{{end}}
+<h1 class="text-xl font-semibold">{{.Item.Title}}</h1>
+{{if .Item.CoverURL}}<img src="{{.Item.CoverURL}}" alt="" class="h-40 object-cover">{{end}}
+<dl>
+  <dt>Type</dt><dd>{{.Item.Kind}}</dd>
+  {{if .Item.Year}}<dt>Year</dt><dd>{{.Item.Year}}</dd>{{end}}
+  {{if .Item.ExternalID}}<dt>External id</dt><dd>{{.Item.ExternalID}}</dd>{{end}}
+</dl>
+<form method="post" action="/catalog/{{.Item.ID}}/cover" enctype="multipart/form-data">
+  <input type="file" name="cover" accept="image/*" required>
+  <button type="submit">Upload cover</button>
+</form>
+<form method="post" action="/progress/{{.Item.ID}}/toggle"><button type="submit">Toggle tilt</button></form>
+<p class="flex gap-3">
+  <a href="/catalog/{{.Item.ID}}/tilt">Tilt</a>
+  <a href="/catalog/{{.Item.ID}}/edit">Edit</a>
+  <a href="/catalog">Back to catalog</a>
+</p>
+<form method="post" action="/catalog/{{.Item.ID}}/delete"><button type="submit">Delete</button></form>
+{{end}}

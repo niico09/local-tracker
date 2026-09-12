@@ -1,0 +1,67 @@
+{{define "content"}}
+{{if .Error}}<p class="text-red-400">{{.Error}}</p>{{end}}
+<h1 class="text-xl font-semibold sm:text-2xl">{{.Goal.Title}}</h1>
+<dl class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm sm:max-w-md">
+  <dt class="text-slate-400">Scope</dt><dd>{{if .Goal.OwnerUserID}}personal{{else}}couple{{end}}</dd>
+  <dt class="text-slate-400">Visibility</dt><dd>{{.Goal.Visibility}}</dd>
+  {{if .Goal.Target}}<dt class="text-slate-400">Target</dt><dd>{{.Goal.Target}}</dd>{{end}}
+</dl>
+
+{{if .Rollup}}<div class="flex items-center gap-3"><span class="text-slate-400">Progress</span>{{template "progress_goal" .}}</div>{{end}}
+
+<h2 class="text-lg font-medium">Items</h2>
+{{if .Members}}
+<ul class="flex flex-col gap-3">
+  {{range .Members}}
+  <li class="flex flex-col gap-2 rounded border border-slate-800 p-3">
+    <div class="flex flex-wrap items-center gap-3">
+      {{if .CoverURL}}<img src="{{.CoverURL}}" alt="" class="h-12 rounded object-cover">{{end}}
+      <a class="font-medium hover:text-emerald-300" href="/catalog/{{.ID}}">{{.Title}}</a>
+      <span class="text-sm text-slate-400">{{.Kind}}</span>
+      <span class="text-sm text-slate-400">Tilt: {{if .TiltOwner}}personal{{else}}shared{{end}}</span>
+      {{if .HasTilt}}<span class="text-sm text-slate-400">{{.TiltState}}</span>{{end}}
+    </div>
+    {{if $.Goal.Editable}}
+    <div class="flex flex-wrap items-center gap-2">
+      <form method="post" action="/progress/{{.ID}}/toggle">
+        <input type="hidden" name="goal_id" value="{{$.Goal.ID}}">
+        <button class="rounded bg-slate-800 px-3 py-1 hover:bg-slate-700" type="submit">Toggle</button>
+      </form>
+      <form class="flex flex-wrap items-center gap-2" method="post" action="/progress/{{.ID}}/dates">
+        <input type="hidden" name="goal_id" value="{{$.Goal.ID}}">
+        <input class="rounded bg-slate-900 px-2 py-1" type="date" name="start" value="{{.StartDate}}">
+        <input class="rounded bg-slate-900 px-2 py-1" type="date" name="end" value="{{.EndDate}}">
+        <label class="text-sm"><input type="checkbox" name="done"{{if .Done}} checked{{end}}> done</label>
+        <button class="rounded bg-slate-800 px-3 py-1 hover:bg-slate-700" type="submit">Save dates</button>
+      </form>
+      <form method="post" action="/goals/{{$.Goal.ID}}/items/{{.ID}}/remove"><button class="rounded bg-slate-800 px-3 py-1 hover:bg-slate-700" type="submit">Remove</button></form>
+    </div>
+    {{end}}
+  </li>
+  {{end}}
+</ul>
+{{else}}
+<p class="text-slate-400">No items yet.</p>
+{{end}}
+
+{{if .Goal.Editable}}
+{{if .Items}}
+<form class="flex flex-wrap items-center gap-2" method="post" action="/goals/{{.Goal.ID}}/items">
+  <select class="rounded bg-slate-900 px-2 py-1" name="item_id">
+    {{range .Items}}<option value="{{.ID}}">{{.Title}}</option>{{end}}
+  </select>
+  <button class="rounded bg-slate-800 px-3 py-1 hover:bg-slate-700" type="submit">Add item</button>
+</form>
+{{end}}
+<p><a class="text-emerald-400 hover:text-emerald-300" href="/goals/{{.Goal.ID}}/edit">Edit</a></p>
+<form class="flex flex-wrap items-center gap-2" method="post" action="/goals/{{.Goal.ID}}/visibility">
+  <select class="rounded bg-slate-900 px-2 py-1" name="visibility">
+    <option value="private"{{if eq .Goal.Visibility "private"}} selected{{end}}>private</option>
+    <option value="shared"{{if eq .Goal.Visibility "shared"}} selected{{end}}>shared</option>
+  </select>
+  <button class="rounded bg-slate-800 px-3 py-1 hover:bg-slate-700" type="submit">Update visibility</button>
+</form>
+<form method="post" action="/goals/{{.Goal.ID}}/delete"><button class="rounded bg-slate-800 px-3 py-1 hover:bg-slate-700" type="submit">Delete</button></form>
+{{end}}
+<p><a class="text-emerald-400 hover:text-emerald-300" href="/goals">Back to goals</a></p>
+{{end}}

@@ -1,0 +1,13 @@
+{{define "content"}}
+<h1 class="text-xl font-semibold">Add goal</h1>
+{{if .Error}}<p class="text-red-400">{{.Error}}</p>{{end}}
+<form class="flex flex-col gap-3" method="post" action="/goals">
+  <input name="title" placeholder="Title" value="{{.GoalForm.Title}}" required>
+  <input name="target" inputmode="numeric" placeholder="Target (optional)" value="{{.GoalForm.Target}}">
+  <label><input type="checkbox" name="couple"{{if .GoalForm.Couple}} checked{{end}}> Couple goal</label>
+  <select name="visibility">
+    {{range .Visibilities}}<option value="{{.}}"{{if eq . $.GoalForm.Visibility}} selected{{end}}>{{.}}</option>{{end}}
+  </select>
+  <button type="submit">Create goal</button>
+</form>
+{{end}}

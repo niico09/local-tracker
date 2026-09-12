@@ -1,0 +1,39 @@
+# local-tracker systemd unit.
+#
+# Install:
+#   sudo install -Dm0755 bin/tracker /usr/local/bin/tracker
+#   sudo install -Dm0644 deploy/local-tracker.service /etc/systemd/system/local-tracker.service
+#   sudo systemctl daemon-reload && sudo systemctl enable --now local-tracker
+#
+# Adjust User/Group and the -data path to match your host. The app speaks
+# plaintext HTTP on the LAN; put it behind a reverse proxy only if you also
+# accept the cookie and CSP tradeoffs documented in README.md.
+
+[Unit]
+Description=local-tracker (two-person shared list)
+Documentation=file:/usr/share/doc/local-tracker/README.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=tracker
+Group=tracker
+WorkingDirectory=/var/lib/local-tracker
+ExecStart=/usr/local/bin/tracker serve -addr 0.0.0.0:8080 -data /var/lib/local-tracker
+Restart=on-failure
+RestartSec=5
+
+# Hardening: the binary only needs its data directory.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/local-tracker
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target

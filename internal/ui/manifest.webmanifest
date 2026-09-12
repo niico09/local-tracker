@@ -1,0 +1,19 @@
+{
+  "name": "Local Tracker",
+  "short_name": "Tracker",
+  "description": "Self-hosted LAN tracker for a two-person shared watch/read list.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "icons": [
+    {
+      "src": "/static/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

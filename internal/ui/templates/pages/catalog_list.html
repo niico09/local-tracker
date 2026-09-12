@@ -1,0 +1,18 @@
+{{define "content"}}
+<div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+  <h1 class="text-xl font-semibold sm:text-2xl">Catalog</h1>
+  <a class="text-emerald-400 hover:text-emerald-300" href="/catalog/new">Add item</a>
+</div>
+{{if .Error}}<p class="text-red-400">{{.Error}}</p>{{end}}
+<ul class="flex flex-col gap-3">
+{{range .Items}}
+  <li class="flex flex-col gap-2 rounded border border-slate-800 p-3 sm:flex-row sm:items-center sm:gap-4">
+    {{if .CoverURL}}<img src="{{.CoverURL}}" alt="" class="h-16 w-16 rounded object-cover">{{end}}
+    <a class="truncate font-medium hover:text-emerald-300" href="/catalog/{{.ID}}">{{.Title}}</a>
+    <span class="text-sm text-slate-400">{{.Kind}}{{if .Year}} ({{.Year}}){{end}}</span>
+  </li>
+{{else}}
+  <li class="text-slate-400">No items yet.</li>
+{{end}}
+</ul>
+{{end}}

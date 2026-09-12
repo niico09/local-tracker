@@ -1,0 +1,9 @@
+{{define "content"}}
+<h1 class="text-xl font-semibold sm:text-2xl">Dashboard</h1>
+<p class="text-slate-400">Signed in as user {{.UserID}}.</p>
+<div class="flex flex-wrap gap-3">
+  <a class="rounded bg-slate-800 px-3 py-2 hover:bg-slate-700" href="/catalog">Catalog</a>
+  <a class="rounded bg-slate-800 px-3 py-2 hover:bg-slate-700" href="/goals">Goals</a>
+</div>
+<form method="post" action="/logout"><button class="rounded bg-slate-800 px-3 py-2 hover:bg-slate-700" type="submit">Sign out</button></form>
+{{end}}

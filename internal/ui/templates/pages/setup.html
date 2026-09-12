@@ -1,0 +1,10 @@
+{{define "content"}}
+<h1 class="text-xl font-semibold">Create the two profiles</h1>
+<form class="flex flex-col gap-3" method="post" action="/setup">
+  <input name="name1" placeholder="Profile 1 name" required>
+  <input name="pin1" type="password" inputmode="numeric" minlength="4" maxlength="12" placeholder="Profile 1 PIN" required>
+  <input name="name2" placeholder="Profile 2 name" required>
+  <input name="pin2" type="password" inputmode="numeric" minlength="4" maxlength="12" placeholder="Profile 2 PIN" required>
+  <button type="submit">Create profiles</button>
+</form>
+{{end}}
