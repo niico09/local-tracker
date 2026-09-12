@@ -1,5 +1,22 @@
 {{define "layout"}}<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{.Title}}</title><link rel="stylesheet" href="/static/app.css"></head>
-<body class="min-h-screen bg-slate-950 text-slate-100"><main class="mx-auto flex max-w-5xl flex-col gap-6 p-4">{{template "content" .}}</main></body>
+<html lang="en" class="h-full">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#020617">
+<title>{{.Title}}</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body class="min-h-full bg-slate-950 text-slate-100 antialiased">
+<header class="border-b border-slate-800">
+  <nav class="mx-auto flex max-w-5xl items-center gap-4 px-4 py-3 text-sm sm:px-6">
+    <a class="font-semibold text-emerald-400" href="/">Local Tracker</a>
+    <a class="hover:text-emerald-300" href="/catalog">Catalog</a>
+    <a class="hover:text-emerald-300" href="/goals">Goals</a>
+  </nav>
+</header>
+<main class="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6 sm:px-6">{{template "content" .}}</main>
+</body>
 </html>{{end}}

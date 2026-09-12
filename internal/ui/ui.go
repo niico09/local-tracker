@@ -5,7 +5,7 @@ package ui
 
 import "embed"
 
-//go:embed all:templates all:static
+//go:embed all:templates all:static manifest.webmanifest
 var files embed.FS
 
 // FS returns the embedded asset tree rooted at the ui package directory.

@@ -1,2 +1,7 @@
-{{define "progress_goal"}}<div id="goal-progress" class="text-sm text-slate-300">{{if .Rollup}}{{.Rollup.Done}}/{{.Rollup.Total}}{{else}}0/0{{end}}</div>{{end}}
-{{define "progress_tilt"}}<div id="item-tilt" class="text-sm text-slate-300">{{if .Tilt}}{{.Tilt.State}} ({{if .Tilt.Owner}}personal{{else}}shared{{end}}){{end}}</div>{{end}}
+{{define "progress_goal"}}<div id="goal-progress" class="flex w-full flex-col gap-1 text-sm text-slate-300">
+  <span class="font-medium text-slate-100">{{if .Rollup}}{{.Rollup.Done}}/{{.Rollup.Total}}{{else}}0/0{{end}}</span>
+  <div class="h-2 w-full overflow-hidden rounded bg-slate-800">
+    <div class="h-2 rounded bg-emerald-500" style="width: {{if .Rollup}}{{.Rollup.Percent}}{{else}}0{{end}}%"></div>
+  </div>
+</div>{{end}}
+{{define "progress_tilt"}}<div id="item-tilt" class="inline-flex items-center gap-2 text-sm text-slate-300">{{if .Tilt}}<span class="rounded bg-slate-800 px-2 py-0.5">{{.Tilt.State}}</span><span>{{if .Tilt.Owner}}personal{{else}}shared{{end}}</span>{{end}}</div>{{end}}

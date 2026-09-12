@@ -36,6 +36,21 @@ type tiltView struct {
 	EndDate   string
 }
 
+// Percent is the clamped display percentage for the fragment's progress bar.
+func (r rollupView) Percent() int {
+	if r.Total <= 0 {
+		return 0
+	}
+	p := r.Done * 100 / r.Total
+	if p < 0 {
+		return 0
+	}
+	if p > 100 {
+		return 100
+	}
+	return p
+}
+
 // toTiltView decorates a progress row with its derived state.
 func toTiltView(p domain.Progress) tiltView {
 	v := tiltView{ItemID: p.ItemID, Owner: p.OwnerUserID, State: domain.DeriveState(p), Done: p.Done}

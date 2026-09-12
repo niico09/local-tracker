@@ -143,11 +143,11 @@ func redirect(w http.ResponseWriter, r *http.Request, location string) {
 }
 
 func isSetupPath(p string) bool {
-	return p == "/setup" || p == "/healthz" ||
+	return p == "/setup" || p == "/healthz" || p == "/manifest.webmanifest" ||
 		strings.HasPrefix(p, "/static/") || strings.HasPrefix(p, "/uploads/")
 }
 
 func isPublicPath(p string) bool {
-	return p == "/healthz" || p == "/login" || p == "/setup" ||
+	return p == "/healthz" || p == "/login" || p == "/setup" || p == "/manifest.webmanifest" ||
 		strings.HasPrefix(p, "/static/") || strings.HasPrefix(p, "/uploads/")
 }

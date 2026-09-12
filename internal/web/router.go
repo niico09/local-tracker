@@ -41,6 +41,7 @@ func NewRouter(deps RouterDeps) *http.ServeMux {
 		if static, err := fs.Sub(deps.Assets, "static"); err == nil {
 			mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServerFS(static)))
 		}
+		mux.HandleFunc("GET /manifest.webmanifest", handleManifest(deps.Assets))
 	}
 	return mux
 }
@@ -60,7 +61,9 @@ func NewServer(deps RouterDeps) (http.Handler, error) {
 	mux.HandleFunc("GET /login", handleLoginGet(tmpls))
 	mux.HandleFunc("POST /login", handleLoginPost(deps.Auth, limiter, tmpls))
 	mux.HandleFunc("POST /logout", handleLogout(deps.Auth))
-	mux.HandleFunc("GET /", handleDashboard(tmpls))
+	// `{$}` matches only the exact root path, so unknown paths 404 instead of
+	// rendering the dashboard.
+	mux.HandleFunc("GET /{$}", handleDashboard(tmpls))
 
 	// Catalog routes. GET /catalog/new is a literal pattern and therefore wins
 	// over GET /catalog/{id} by ServeMux specificity regardless of order.
@@ -115,6 +118,22 @@ func NewServer(deps RouterDeps) (http.Handler, error) {
 		func(next http.Handler) http.Handler { return Authenticate(deps.Auth, next) },
 		RequireAuth,
 	), nil
+}
+
+// handleManifest serves the embedded PWA manifest. There is deliberately no
+// service worker: the app runs over plaintext LAN HTTP and claims no offline
+// behavior, so the manifest only enables an add-to-home-screen shortcut.
+func handleManifest(assets fs.FS) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		data, err := fs.ReadFile(assets, "manifest.webmanifest")
+		if err != nil {
+			http.Error(w, "manifest unavailable", http.StatusNotFound)
+			return
+		}
+		w.Header().Set("Content-Type", "application/manifest+json")
+		w.Header().Set("Cache-Control", "public, max-age=3600")
+		_, _ = w.Write(data)
+	}
 }
 
 // handleHealth reports the live SQLite pragma state; it returns 200 only when

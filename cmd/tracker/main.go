@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"local-tracker/internal/config"
+	"local-tracker/internal/seed"
 	"local-tracker/internal/service"
 	"local-tracker/internal/storage"
 	"local-tracker/internal/ui"
@@ -26,8 +27,7 @@ func main() {
 	}
 }
 
-// run wires config, SQLite, the auth service and the HTTP server, then serves
-// until SIGINT/SIGTERM triggers a graceful shutdown.
+// run dispatches on the subcommand: serve (default), seed, or backup.
 func run(args []string) error {
 	cfg, err := config.Load(args)
 	if err != nil {
@@ -35,12 +35,59 @@ func run(args []string) error {
 	}
 	switch cfg.Command {
 	case "serve":
-	case "seed", "backup":
-		return fmt.Errorf("command %q is not implemented until slice S6", cfg.Command)
+		return serve(cfg)
+	case "seed":
+		return runSeed(cfg)
+	case "backup":
+		return runBackup(cfg)
 	default:
 		return fmt.Errorf("unknown command %q", cfg.Command)
 	}
+}
 
+// runSeed applies the embedded Top 100 list. It is idempotent: a second run
+// inserts nothing and reports the same database counts.
+func runSeed(cfg config.Config) error {
+	ctx := context.Background()
+	db, err := storage.Open(ctx, cfg.DBPath)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	seeder := service.NewSeed(storage.NewRepos(db).Seed, seed.Load)
+	result, err := seeder.Run(ctx)
+	if err != nil {
+		return err
+	}
+	log.Printf("seed: goal created=%t items inserted=%d kept=%d memberships added=%d",
+		result.GoalCreated, result.ItemsInserted, result.ItemsKept, result.MembershipsAdded)
+	return nil
+}
+
+// runBackup writes a WAL-safe snapshot with VACUUM INTO and, with -uploads,
+// copies the uploads tree beside it.
+func runBackup(cfg config.Config) error {
+	if cfg.BackupDest == "" {
+		return errors.New("usage: tracker backup [-uploads] <destination>")
+	}
+	ctx := context.Background()
+	db, err := storage.Open(ctx, cfg.DBPath)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	if err := storage.Backup(ctx, db, cfg.BackupDest, filepath.Join(cfg.DataDir, "uploads"), cfg.BackupUploads); err != nil {
+		return err
+	}
+	log.Printf("backup: wrote %s", cfg.BackupDest)
+	return nil
+}
+
+// serve wires config, SQLite, the use cases and the HTTP server, then serves
+// until SIGINT/SIGTERM triggers a graceful shutdown.
+func serve(cfg config.Config) error {
 	ctx := context.Background()
 	db, err := storage.Open(ctx, cfg.DBPath)
 	if err != nil {

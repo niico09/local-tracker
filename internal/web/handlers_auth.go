@@ -163,16 +163,16 @@ func clientIP(r *http.Request) string {
 type templates map[string]*template.Template
 
 // parseTemplates parses base.html plus each page separately so every page can
-// define its own "content" block without name collisions. The two HTMX fragment
-// pages also parse the partials they render.
+// define its own "content" block without name collisions. Pages that render the
+// HTMX progress fragments also parse partials/progress.html.
 func parseTemplates(assets fs.FS) (templates, error) {
 	pages := []string{"setup", "login", "dashboard", "catalog_list", "catalog_detail", "catalog_new", "catalog_edit",
 		"goals_list", "goal_detail", "goal_new", "goal_edit", "goal_progress", "catalog_tilt"}
-	fragments := map[string]bool{"goal_progress": true, "catalog_tilt": true}
+	needsProgress := map[string]bool{"goal_detail": true, "goal_progress": true, "catalog_tilt": true}
 	out := make(templates, len(pages))
 	for _, name := range pages {
 		files := []string{"templates/base.html", "templates/pages/" + name + ".html"}
-		if fragments[name] {
+		if needsProgress[name] {
 			files = append(files, "templates/partials/progress.html")
 		}
 		t, err := template.ParseFS(assets, files...)
