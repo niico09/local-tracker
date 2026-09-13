@@ -85,6 +85,7 @@ type Repos struct {
 	Goals      *GoalRepo
 	Membership *MembershipRepo
 	Progress   *ProgressRepo
+	Reviews    *ReviewRepo
 	Seed       *SeedRepo
 }
 
@@ -97,6 +98,7 @@ func NewRepos(db *DB) *Repos {
 		Goals:      &GoalRepo{db: db},
 		Membership: &MembershipRepo{db: db},
 		Progress:   &ProgressRepo{db: db},
+		Reviews:    &ReviewRepo{db: db},
 		Seed:       &SeedRepo{db: db},
 	}
 }

@@ -1,0 +1,31 @@
+{{define "content"}}
+<a class="backlink" href="/catalog/{{.Item.ID}}">← Volver al título</a>
+<div class="page-head">
+  <div><p class="eyebrow">Portada automática</p><h1>Buscar portada</h1></div>
+</div>
+{{if .Error}}<p class="alert" role="alert">{{.Error}}</p>{{end}}
+<form class="form-page" method="get" action="/catalog/{{.Item.ID}}/cover/search">
+  <div class="field"><label for="q">Buscar por título</label><input class="input" id="q" name="q" value="{{.Query}}" required></div>
+  <div class="form-actions"><button class="btn btn-primary" type="submit">Buscar</button></div>
+</form>
+{{if .Candidates}}
+<div class="section-sub"><h2>Resultados</h2><span class="count-note">{{len .Candidates}} opciones</span></div>
+<div class="cand-grid">
+  {{range .Candidates}}
+  <div class="cand">
+    <div class="mount"><span class="cover-box"><img src="/catalog/{{$.Item.ID}}/cover/candidate?u={{urlquery .ThumbURL}}" alt="Candidata: {{.Label}}" loading="lazy"></span></div>
+    <p class="cand-label">{{.Label}}</p>
+    <form method="post" action="/catalog/{{$.Item.ID}}/cover/use">
+      <input type="hidden" name="u" value="{{.FullURL}}">
+      <button class="btn btn-secondary btn-sm btn-block" type="submit">Usar esta</button>
+    </form>
+  </div>
+  {{end}}
+</div>
+{{else if .Searched}}{{if not .Error}}
+<div class="empty">
+  <h3>Sin resultados</h3>
+  <p>Prueba con otro texto o sube una imagen a mano.</p>
+</div>
+{{end}}{{end}}
+{{end}}

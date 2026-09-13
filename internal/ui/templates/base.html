@@ -8,9 +8,15 @@
     <nav class="nav" aria-label="Secciones">
       <a href="/" data-nav="/">Panel</a>
       <a href="/catalog" data-nav="/catalog">Catálogo</a>
+      <a href="/ruleta" data-nav="/ruleta">Ruleta</a>
       <a href="/goals" data-nav="/goals">Metas</a>
+      <a href="/bitacora" data-nav="/bitacora">Bitácora</a>
     </nav>
     <div class="side-foot">
+      <button class="btn btn-secondary btn-icon" id="theme-toggle" type="button" aria-label="Cambiar entre modo claro y modo cine">
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21M5.6 5.6l1.7 1.7M16.7 16.7l1.7 1.7M18.4 5.6l-1.7 1.7M7.3 16.7l-1.7 1.7"/></svg>
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20.5 14.8A8.5 8.5 0 0 1 9.2 3.5a8.5 8.5 0 1 0 11.3 11.3Z"/></svg>
+      </button>
       <form method="post" action="/logout"><button class="btn btn-secondary btn-block" type="submit">Cerrar sesión</button></form>
       <p class="side-note">Datos locales · SQLite</p>
     </div>
@@ -21,7 +27,7 @@
 </body>
 </html>{{end}}
 {{define "ui-head"}}<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f2efeb">
 <title>{{.Title}} · Local Tracker</title>
 <link rel="manifest" href="/manifest.webmanifest">

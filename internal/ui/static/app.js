@@ -4,11 +4,44 @@
 (function () {
   "use strict";
 
+  var THEME_KEY = "lt-theme";
+
+  // The theme is applied before anything else so the document comes up in the
+  // right skin. Everything stays CSP-safe: no inline script, no inline style.
+  (function initTheme() {
+    var mode = "light";
+    try {
+      if (localStorage.getItem(THEME_KEY) === "dark") mode = "dark";
+    } catch (e) {}
+    setTheme(mode, false);
+  })();
+
+  function setTheme(mode, persist) {
+    document.documentElement.setAttribute("data-theme", mode);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", mode === "dark" ? "#1c1a17" : "#f2efeb");
+    if (persist) {
+      try {
+        localStorage.setItem(THEME_KEY, mode);
+      } catch (e) {}
+    }
+  }
+
+  function wireThemeToggle() {
+    var btn = document.getElementById("theme-toggle");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      var next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      setTheme(next, true);
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     paintMeters();
     markActiveNav();
     wireConfirmForms();
     buildCatalogToolbar();
+    wireThemeToggle();
   });
 
   // Meter fills travel as data-pct because inline style attributes are blocked

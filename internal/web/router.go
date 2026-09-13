@@ -12,15 +12,18 @@ import (
 // RouterDeps carries the collaborators the HTTP layer needs. Health is a
 // function rather than a storage type so web keeps no dependency on storage.
 type RouterDeps struct {
-	Health     func(ctx context.Context) (journalMode string, foreignKeys int, err error)
-	Assets     fs.FS
-	Auth       Auth
-	Catalog    Catalog
-	Goals      Goals
-	Membership Membership
-	Progress   Progress
-	Covers     CoverFiles
-	UploadMax  int64
+	Health      func(ctx context.Context) (journalMode string, foreignKeys int, err error)
+	Assets      fs.FS
+	Auth        Auth
+	Catalog     Catalog
+	Goals       Goals
+	Membership  Membership
+	Progress    Progress
+	Reviews     Reviews
+	Covers      CoverFiles
+	UploadMax   int64
+	CoverFinder CoverFinder
+	Backup      func(ctx context.Context) (string, error)
 }
 
 // healthResponse is the JSON shape returned by GET /healthz.
@@ -63,7 +66,7 @@ func NewServer(deps RouterDeps) (http.Handler, error) {
 	mux.HandleFunc("POST /logout", handleLogout(deps.Auth))
 	// `{$}` matches only the exact root path, so unknown paths 404 instead of
 	// rendering the dashboard.
-	mux.HandleFunc("GET /{$}", handleDashboard(tmpls))
+	mux.HandleFunc("GET /{$}", handleDashboard(tmpls, deps.Backup != nil))
 
 	// Catalog routes. GET /catalog/new is a literal pattern and therefore wins
 	// over GET /catalog/{id} by ServeMux specificity regardless of order.
@@ -72,11 +75,20 @@ func NewServer(deps RouterDeps) (http.Handler, error) {
 		mux.HandleFunc("POST /catalog", handleCatalogCreate(deps.Catalog, tmpls))
 		mux.HandleFunc("GET /catalog/new", handleCatalogNew(tmpls))
 		mux.HandleFunc("POST /catalog/new", handleCatalogCreate(deps.Catalog, tmpls))
-		mux.HandleFunc("GET /catalog/{id}", handleCatalogDetail(deps.Catalog, tmpls))
+		mux.HandleFunc("GET /catalog/{id}", handleCatalogDetail(deps.Catalog, deps.Reviews, deps.CoverFinder, tmpls))
 		mux.HandleFunc("GET /catalog/{id}/edit", handleCatalogEdit(deps.Catalog, tmpls))
 		mux.HandleFunc("POST /catalog/{id}/edit", handleCatalogUpdate(deps.Catalog, tmpls))
 		mux.HandleFunc("POST /catalog/{id}/delete", handleCatalogDelete(deps.Catalog))
 		mux.HandleFunc("POST /catalog/{id}/cover", handleCatalogCover(deps.Catalog, deps.UploadMax))
+		if deps.Reviews != nil {
+			mux.HandleFunc("POST /catalog/{id}/rating", handleRatingSet(deps.Reviews))
+			mux.HandleFunc("POST /catalog/{id}/note", handleNoteSet(deps.Reviews))
+		}
+		if deps.CoverFinder != nil {
+			mux.HandleFunc("GET /catalog/{id}/cover/search", handleCoverSearch(deps.Catalog, deps.CoverFinder, tmpls))
+			mux.HandleFunc("GET /catalog/{id}/cover/candidate", handleCoverCandidate(deps.Catalog, deps.CoverFinder))
+			mux.HandleFunc("POST /catalog/{id}/cover/use", handleCoverUse(deps.Catalog, deps.CoverFinder))
+		}
 	}
 	if deps.Covers != nil {
 		mux.HandleFunc("GET /uploads/{name}", handleUploads(deps.Covers))
@@ -107,6 +119,18 @@ func NewServer(deps RouterDeps) (http.Handler, error) {
 		mux.HandleFunc("POST /progress/{itemID}/dates", handleProgressDates(deps.Progress, tmpls))
 		mux.HandleFunc("GET /goals/{id}/progress", handleGoalProgress(deps.Progress, tmpls))
 		mux.HandleFunc("GET /catalog/{id}/tilt", handleCatalogTilt(deps.Progress, tmpls))
+	}
+
+	// Ruleta and bitácora read the catalog plus progress; both degrade to plain
+	// server-rendered pages.
+	if deps.Catalog != nil && deps.Progress != nil {
+		mux.HandleFunc("GET /ruleta", handleRuleta(deps.Catalog, deps.Progress, tmpls))
+		mux.HandleFunc("GET /bitacora", handleBitacora(deps.Catalog, deps.Progress, tmpls))
+	}
+
+	// UI backup: streams a VACUUM INTO snapshot as a download.
+	if deps.Backup != nil {
+		mux.HandleFunc("POST /backup", handleBackup(deps.Backup))
 	}
 
 	return Chain(mux,

@@ -18,19 +18,19 @@ func TestMigrateIsIdempotent(t *testing.T) {
 		return got
 	}
 
-	// 6 domain tables + schema_migrations, ledger holds one applied version.
-	if got := scalar("SELECT COUNT(*) FROM schema_migrations"); got != 1 {
-		t.Errorf("schema_migrations rows = %d, want 1", got)
+	// 8 domain tables + schema_migrations, ledger holds two applied versions.
+	if got := scalar("SELECT COUNT(*) FROM schema_migrations"); got != 2 {
+		t.Errorf("schema_migrations rows = %d, want 2", got)
 	}
-	if got := scalar("SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'"); got != 7 {
-		t.Errorf("table count = %d, want 7", got)
+	if got := scalar("SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'"); got != 9 {
+		t.Errorf("table count = %d, want 9", got)
 	}
 
 	if err := db.Migrate(ctx); err != nil {
 		t.Fatalf("second Migrate: %v", err)
 	}
-	if got := scalar("SELECT COUNT(*) FROM schema_migrations"); got != 1 {
-		t.Errorf("schema_migrations after re-run = %d, want 1", got)
+	if got := scalar("SELECT COUNT(*) FROM schema_migrations"); got != 2 {
+		t.Errorf("schema_migrations after re-run = %d, want 2", got)
 	}
 }
 
@@ -55,5 +55,10 @@ func TestSchemaIncludesG1AndNullSafeUniqueIndex(t *testing.T) {
 	}
 	if got := count("SELECT COUNT(*) FROM pragma_table_info('goals') WHERE name = 'external_key'"); got != 1 {
 		t.Errorf("goals.external_key count = %d, want 1", got)
+	}
+	for _, table := range []string{"item_ratings", "item_notes"} {
+		if got := count("SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = ?", table); got != 1 {
+			t.Errorf("table %s count = %d, want 1", table, got)
+		}
 	}
 }

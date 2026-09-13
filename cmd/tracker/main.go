@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"local-tracker/internal/config"
+	"local-tracker/internal/coverfetch"
 	"local-tracker/internal/seed"
 	"local-tracker/internal/service"
 	"local-tracker/internal/storage"
@@ -103,16 +104,44 @@ func serve(cfg config.Config) error {
 	goals := service.NewGoals(repos.Goals)
 	members := service.NewMembership(repos.Membership)
 	progress := service.NewProgress(repos.Progress)
+	reviews := service.NewReviews(repos.Reviews)
+	finder := coverfetch.New()
+
+	// backupSnapshot produces a WAL-safe snapshot in the OS temp directory for
+	// the UI download route. The handler removes the file right after serving.
+	backupSnapshot := func(ctx context.Context) (string, error) {
+		tmp, err := os.CreateTemp("", "tracker-snapshot-*.db")
+		if err != nil {
+			return "", err
+		}
+		name := tmp.Name()
+		if err := tmp.Close(); err != nil {
+			return "", err
+		}
+		// VACUUM INTO refuses an existing destination, so the reserved name is
+		// dropped right before the snapshot is written.
+		if err := os.Remove(name); err != nil {
+			return "", err
+		}
+		if err := storage.Backup(ctx, db, name, "", false); err != nil {
+			return "", err
+		}
+		return name, nil
+	}
+
 	handler, err := web.NewServer(web.RouterDeps{
-		Health:     db.Health,
-		Assets:     ui.FS(),
-		Auth:       auth,
-		Catalog:    catalog,
-		Goals:      goals,
-		Membership: members,
-		Progress:   progress,
-		Covers:     covers,
-		UploadMax:  cfg.UploadMax,
+		Health:      db.Health,
+		Assets:      ui.FS(),
+		Auth:        auth,
+		Catalog:     catalog,
+		Goals:       goals,
+		Membership:  members,
+		Progress:    progress,
+		Reviews:     reviews,
+		Covers:      covers,
+		UploadMax:   cfg.UploadMax,
+		CoverFinder: finder,
+		Backup:      backupSnapshot,
 	})
 	if err != nil {
 		return err

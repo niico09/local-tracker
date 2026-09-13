@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 
+	"local-tracker/internal/coverfetch"
 	"local-tracker/internal/domain"
 	"local-tracker/internal/service"
 )
@@ -41,6 +42,32 @@ type pageData struct {
 	Members      []memberView
 	Rollup       *rollupView
 	Tilt         *tiltView
+
+	// Ruleta
+	Kind        domain.Kind
+	Pick        *ruletaPick
+	SeriesCount int
+	MovieCount  int
+
+	// Bitácora
+	Bitacora      []bitacoraMonth
+	BitacoraTotal int
+
+	// Reviews (notas y puntaje)
+	CanReview     bool
+	MyRating      int
+	PartnerRating int
+	PartnerStars  string
+	Note          string
+
+	// Portada automática
+	CanSearchCover bool
+	Query          string
+	Candidates     []coverfetch.Candidate
+	Searched       bool
+
+	// Backup
+	CanBackup bool
 }
 
 func handleSetupGet(auth Auth, tmpls templates) http.HandlerFunc {
@@ -119,10 +146,10 @@ func handleLogout(auth Auth) http.HandlerFunc {
 	}
 }
 
-func handleDashboard(tmpls templates) http.HandlerFunc {
+func handleDashboard(tmpls templates, canBackup bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		actor, _ := ActorFrom(r.Context())
-		render(w, tmpls, "dashboard", http.StatusOK, pageData{Title: "Dashboard", UserID: actor.ID()})
+		render(w, tmpls, "dashboard", http.StatusOK, pageData{Title: "Panel", UserID: actor.ID(), CanBackup: canBackup})
 	}
 }
 
@@ -167,7 +194,8 @@ type templates map[string]*template.Template
 // HTMX progress fragments also parse partials/progress.html.
 func parseTemplates(assets fs.FS) (templates, error) {
 	pages := []string{"setup", "login", "dashboard", "catalog_list", "catalog_detail", "catalog_new", "catalog_edit",
-		"goals_list", "goal_detail", "goal_new", "goal_edit", "goal_progress", "catalog_tilt"}
+		"goals_list", "goal_detail", "goal_new", "goal_edit", "goal_progress", "catalog_tilt",
+		"ruleta", "bitacora", "cover_search"}
 	needsProgress := map[string]bool{"goal_detail": true, "goal_progress": true, "catalog_tilt": true}
 	out := make(templates, len(pages))
 	for _, name := range pages {

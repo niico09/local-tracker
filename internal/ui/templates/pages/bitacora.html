@@ -1,0 +1,28 @@
+{{define "content"}}
+<div class="page-head">
+  <div><p class="eyebrow">Bitácora · {{.BitacoraTotal}} títulos completados</p><h1>Bitácora</h1></div>
+</div>
+{{if .Bitacora}}
+{{range .Bitacora}}
+<div class="section-sub"><h2>{{.Label}}</h2><span class="count-note">{{.Count}}{{if eq .Count 1}} título{{else}} títulos{{end}}</span></div>
+<ul class="rowlist">
+  {{range .Entries}}
+  <li class="row-item" data-od-id="bitacora-{{.ID}}">
+    {{template "ui-thumb" .}}
+    <div>
+      <a class="row-title" href="/catalog/{{.ID}}">{{.Title}}</a>
+      <div class="row-meta">{{template "ui-kind" .Kind}}{{if .Year}} · {{.Year}}{{end}} · {{.OwnerNote}}</div>
+    </div>
+    <div class="row-actions"><span class="dated">{{.DayLabel}}</span></div>
+  </li>
+  {{end}}
+</ul>
+{{end}}
+{{else}}
+<div class="empty">
+  <h3>Todavía no hay nada completado</h3>
+  <p>Cuando marquen un título como hecho, aparece aquí con su fecha.</p>
+  <a class="btn btn-secondary" href="/catalog">Ir al catálogo</a>
+</div>
+{{end}}
+{{end}}

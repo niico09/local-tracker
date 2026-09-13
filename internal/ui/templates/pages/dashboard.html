@@ -20,5 +20,12 @@
     <span class="home-card-cta">Abrir metas →</span>
   </a>
 </div>
-<p class="home-note">¿Algo nuevo para la lista? <a class="linklike" href="/catalog/new">Añade un título</a>.</p>
+<p class="home-note">¿Algo nuevo para la lista? <a class="linklike" href="/catalog/new">Añade un título</a> · ¿sin decidir? Prueba la <a class="linklike" href="/ruleta">ruleta</a> · ¿nostalgia? Mira la <a class="linklike" href="/bitacora">bitácora</a>.</p>
+{{if .CanBackup}}
+<div class="panel" data-od-id="panel-datos">
+  <h2>Datos</h2>
+  <p class="panel-sub">Todo vive en tu SQLite local, sin nube. Descarga una copia consistente cuando quieras; las portadas se respaldan aparte con <span class="mono">tracker backup -uploads</span>.</p>
+  <form method="post" action="/backup"><button class="btn btn-secondary" type="submit">Descargar copia de la base</button></form>
+</div>
+{{end}}
 {{end}}

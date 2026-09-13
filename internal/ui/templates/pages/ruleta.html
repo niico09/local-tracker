@@ -1,0 +1,42 @@
+{{define "content"}}
+<div class="page-head">
+  <div><p class="eyebrow">Ruleta · {{.SeriesCount}} series · {{.MovieCount}} películas</p><h1>¿Qué vemos hoy?</h1></div>
+</div>
+{{if not .Kind}}
+<p class="lead-sm">Elige una categoría y la ruleta propone un título pendiente: una decisión y a mirar.</p>
+<div class="home-grid">
+  <a class="home-card" href="/ruleta?kind=series" data-od-id="ruleta-series">
+    <span class="home-card-kicker">Series</span>
+    <span class="home-card-title">Series</span>
+    <span class="home-card-note">{{.SeriesCount}} en el catálogo. La ruleta salta las completadas.</span>
+    <span class="home-card-cta">Girar series →</span>
+  </a>
+  <a class="home-card" href="/ruleta?kind=movie" data-od-id="ruleta-movies">
+    <span class="home-card-kicker">Películas</span>
+    <span class="home-card-title">Películas</span>
+    <span class="home-card-note">{{.MovieCount}} en el catálogo. La ruleta salta las completadas.</span>
+    <span class="home-card-cta">Girar películas →</span>
+  </a>
+</div>
+{{else}}
+{{if .Pick}}
+<div class="pick" data-od-id="ruleta-result">
+  <span class="count-note">{{if eq .Kind "series"}}Serie elegida{{else}}Película elegida{{end}}</span>
+  <div class="mount pick-cover"><span class="cover-box">{{if .Pick.CoverURL}}<img src="{{.Pick.CoverURL}}" alt="Portada de {{.Pick.Title}}" loading="lazy">{{else}}<span class="cover-fallback" aria-hidden="true"><span class="cf-mark">{{template "ui-mark"}}</span><span class="cf-title">{{.Pick.Title}}</span><span class="cf-foot">Sin portada</span></span>{{end}}</span></div>
+  <h2 class="pick-title">{{.Pick.Title}}</h2>
+  <div class="detail-tags">{{template "ui-state" .Pick.State}}<span class="chip">{{template "ui-kind" .Pick.Kind}}{{if .Pick.Year}} · {{.Pick.Year}}{{end}}</span></div>
+  <div class="pick-actions">
+    <a class="btn btn-primary" href="/catalog/{{.Pick.ID}}">Ir a este título</a>
+    <a class="btn btn-secondary" href="/ruleta?kind={{.Kind}}">Girar de nuevo</a>
+  </div>
+  <p class="pick-alt"><a class="linklike" href="/ruleta">Cambiar de categoría</a></p>
+</div>
+{{else}}
+<div class="empty">
+  <h3>No quedan {{if eq .Kind "series"}}series{{else}}películas{{end}} por ver</h3>
+  <p>Todo lo de esta categoría está completado. Buen trabajo.</p>
+  <a class="btn btn-secondary" href="/catalog/new">Añadir título</a>
+</div>
+{{end}}
+{{end}}
+{{end}}

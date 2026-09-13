@@ -45,16 +45,26 @@ func newHarness(t *testing.T) *harness {
 	goals := service.NewGoals(repos.Goals)
 	members := service.NewMembership(repos.Membership)
 	progress := service.NewProgress(repos.Progress)
+	reviews := service.NewReviews(repos.Reviews)
 	handler, err := web.NewServer(web.RouterDeps{
-		Health:     db.Health,
-		Assets:     ui.FS(),
-		Auth:       auth,
-		Catalog:    catalog,
-		Goals:      goals,
-		Membership: members,
-		Progress:   progress,
-		Covers:     covers,
-		UploadMax:  5 << 20,
+		Health:      db.Health,
+		Assets:      ui.FS(),
+		Auth:        auth,
+		Catalog:     catalog,
+		Goals:       goals,
+		Membership:  members,
+		Progress:    progress,
+		Reviews:     reviews,
+		Covers:      covers,
+		UploadMax:   5 << 20,
+		CoverFinder: coverStub{},
+		Backup: func(ctx context.Context) (string, error) {
+			dest := filepath.Join(t.TempDir(), "snapshot.db")
+			if err := storage.Backup(ctx, db, dest, "", false); err != nil {
+				return "", err
+			}
+			return dest, nil
+		},
 	})
 	if err != nil {
 		t.Fatalf("web.NewServer: %v", err)

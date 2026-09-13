@@ -80,3 +80,22 @@ type ProgressRepository interface {
 	// target-else-member-count denominator via Rollup.
 	GoalRollup(ctx context.Context, a Actor, goalID GoalID) (done, total int, err error)
 }
+
+// ReviewRepository persists per-profile ratings and the shared note of one
+// item. Every method requires an Actor and authorizes through the enclosing
+// item, so a personal item's reviews stay private to its owner while a shared
+// item's reviews are visible to both partners.
+type ReviewRepository interface {
+	// Ratings returns every stored rating of one item, ordered by user id.
+	Ratings(ctx context.Context, a Actor, itemID ItemID) ([]Rating, error)
+	// SetRating upserts one profile's score. userID is derived server-side by
+	// the service; a profile may only rate itself.
+	SetRating(ctx context.Context, a Actor, itemID ItemID, userID UserID, score int) (Rating, error)
+	// Note returns the shared note; an absent note reads as an empty body
+	// rather than ErrNotFound.
+	Note(ctx context.Context, a Actor, itemID ItemID) (Note, error)
+	// SetNote upserts the shared note body.
+	SetNote(ctx context.Context, a Actor, itemID ItemID, body string) (Note, error)
+	// DeleteNote removes the shared note; a missing row is not an error.
+	DeleteNote(ctx context.Context, a Actor, itemID ItemID) error
+}

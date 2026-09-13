@@ -138,7 +138,7 @@ func handleCatalogCreate(cat Catalog, tmpls templates) http.HandlerFunc {
 	}
 }
 
-func handleCatalogDetail(cat Catalog, tmpls templates) http.HandlerFunc {
+func handleCatalogDetail(cat Catalog, reviews Reviews, finder CoverFinder, tmpls templates) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, ok := itemID(r)
 		if !ok {
@@ -151,7 +151,28 @@ func handleCatalogDetail(cat Catalog, tmpls templates) http.HandlerFunc {
 			return
 		}
 		v := toView(item)
-		render(w, tmpls, "catalog_detail", http.StatusOK, pageData{Title: item.Title, Item: &v})
+		data := pageData{Title: item.Title, Item: &v, CanSearchCover: finder != nil}
+		if reviews != nil {
+			ratings, note, err := reviews.Get(r.Context(), actorOf(r), id)
+			if err != nil {
+				fail(w, r, err)
+				return
+			}
+			me := actorOf(r).ID()
+			for _, rating := range ratings {
+				if rating.UserID == me {
+					data.MyRating = rating.Score
+				} else {
+					data.PartnerRating = rating.Score
+				}
+			}
+			if data.PartnerRating > 0 {
+				data.PartnerStars = strings.Repeat("★", data.PartnerRating) + strings.Repeat("☆", 5-data.PartnerRating)
+			}
+			data.Note = note.Body
+			data.CanReview = true
+		}
+		render(w, tmpls, "catalog_detail", http.StatusOK, data)
 	}
 }
 
