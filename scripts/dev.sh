@@ -5,6 +5,11 @@
 # Mirrors the Makefile targets so `make` is not required. Needs `go` and `npx`
 # on PATH; intended for Git Bash or any POSIX shell.
 #
+# run/seed/backup execute through `go run` rather than the binary in bin/.
+# Where Windows Smart App Control is enforced, Code Integrity blocks the
+# freshly built unsigned binary (Permission denied, exit 126); `go run`
+# compiles to a temp image that the policy does not block.
+#
 # Usage:
 #   scripts/dev.sh <command> [args]
 #
@@ -13,9 +18,9 @@
 #   css      Build the minified Tailwind bundle into internal/ui/static/app.css.
 #   build    Build the CSS bundle, then compile the Go binary into bin/.
 #   test     Run the Go test suite.
-#   run      Build, then serve the app. This is the default command.
-#   seed     Build if needed, then apply the embedded Top 100 seed (idempotent).
-#   backup   Build if needed, then snapshot the DB: backup [-uploads] <dest>.
+#   run      Build the CSS, then serve the app via go run. Default command.
+#   seed     Apply the embedded Top 100 seed (idempotent) via go run.
+#   backup   Snapshot the DB via go run: backup [-uploads] <dest>.
 #   help     Print this help.
 #
 set -euo pipefail
@@ -25,20 +30,6 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
 GO="${GO:-go}"
-
-# `go build -o bin/tracker` appends .exe on Windows, so resolve whichever
-# name the toolchain actually produced instead of assuming one.
-tracker_bin() {
-  if [[ -f bin/tracker.exe ]]; then
-    printf '%s' "bin/tracker.exe"
-  else
-    printf '%s' "bin/tracker"
-  fi
-}
-
-ensure_built() {
-  [[ -f bin/tracker || -f bin/tracker.exe ]] || cmd_build
-}
 
 # input.css does `@import "tailwindcss"`, so the CLI needs the package
 # installed locally; without it Tailwind fails with a cryptic resolve error.
@@ -72,19 +63,19 @@ cmd_test() {
   "$GO" test ./...
 }
 
+# Assets are embedded at compile time, so the CSS must be regenerated before
+# `go run` compiles the server.
 cmd_run() {
-  cmd_build
-  "./$(tracker_bin)" serve
+  cmd_css
+  CGO_ENABLED=0 "$GO" run ./cmd/tracker serve
 }
 
 cmd_seed() {
-  ensure_built
-  "./$(tracker_bin)" seed
+  CGO_ENABLED=0 "$GO" run ./cmd/tracker seed
 }
 
 cmd_backup() {
-  ensure_built
-  "./$(tracker_bin)" backup "$@"
+  CGO_ENABLED=0 "$GO" run ./cmd/tracker backup "$@"
 }
 
 cmd_help() {
@@ -96,9 +87,9 @@ cmd_help() {
     '  css      Build the minified Tailwind bundle into internal/ui/static/app.css.' \
     '  build    Build the CSS bundle, then compile the Go binary into bin/.' \
     '  test     Run the Go test suite.' \
-    '  run      Build, then serve the app. This is the default command.' \
-    '  seed     Build if needed, then apply the embedded Top 100 seed (idempotent).' \
-    '  backup   Build if needed, then snapshot the DB: backup [-uploads] <dest>.' \
+    '  run      Build the CSS, then serve the app via go run. Default command.' \
+    '  seed     Apply the embedded Top 100 seed (idempotent) via go run.' \
+    '  backup   Snapshot the DB via go run: backup [-uploads] <dest>.' \
     '  help     Print this help.'
 }
 
