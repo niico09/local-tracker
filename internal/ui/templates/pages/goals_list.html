@@ -1,19 +1,37 @@
 {{define "content"}}
-<div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-  <h1 class="text-xl font-semibold sm:text-2xl">Goals</h1>
-  <a class="text-emerald-400 hover:text-emerald-300" href="/goals/new">Add goal</a>
+<div class="page-head">
+  <div><p class="eyebrow">Metas · {{len .Goals}}</p><h1>Metas</h1></div>
+  <div class="page-actions"><a class="btn btn-primary" href="/goals/new" data-od-id="cta-new-goal">Nueva meta</a></div>
 </div>
-{{if .Error}}<p class="text-red-400">{{.Error}}</p>{{end}}
-<ul class="flex flex-col gap-3">
-{{range .Goals}}
-  <li class="flex flex-col gap-1 rounded border border-slate-800 p-3 sm:flex-row sm:items-center sm:gap-4">
-    <a class="font-medium hover:text-emerald-300" href="/goals/{{.ID}}">{{.Title}}</a>
-    <span class="text-sm text-slate-400">{{if .OwnerUserID}}personal{{else}}couple{{end}}</span>
-    <span class="text-sm text-slate-400">{{.Visibility}}</span>
-    {{if .Target}}<span class="text-sm text-slate-400">target {{.Target}}</span>{{end}}
-  </li>
+{{if .Error}}<p class="alert" role="alert">{{.Error}}</p>{{end}}
+{{if .Goals}}
+<div class="section-sub"><h2>En pareja</h2><span class="count-note">Compartidas por los dos</span></div>
+<div class="goals-grid">
+  {{range .Goals}}{{if not .OwnerUserID}}
+  <a class="goal-card" href="/goals/{{.ID}}">
+    <span class="goal-card-head"><span class="goal-card-title">{{.Title}}</span>{{if .Target}}<span class="count-note">Objetivo {{.Target}}</span>{{end}}</span>
+    <span class="goal-card-tags"><span class="chip">En pareja</span></span>
+  </a>
+  {{end}}{{end}}
+</div>
+<div class="section-sub"><h2>Personales</h2><span class="count-note">Con visibilidad propia</span></div>
+<div class="goals-grid">
+  {{range .Goals}}{{if .OwnerUserID}}
+  <a class="goal-card" href="/goals/{{.ID}}">
+    <span class="goal-card-head"><span class="goal-card-title">{{.Title}}</span>{{if .Target}}<span class="count-note">Objetivo {{.Target}}</span>{{end}}</span>
+    <span class="goal-card-tags">
+      <span class="chip">Personal</span>
+      {{if eq .Visibility "shared"}}<span class="chip chip-strong">Compartida</span>{{else}}<span class="chip">Privada</span>{{end}}
+      {{if not .Editable}}<span class="chip chip-readonly">Solo lectura</span>{{end}}
+    </span>
+  </a>
+  {{end}}{{end}}
+</div>
 {{else}}
-  <li class="text-slate-400">No goals yet.</li>
+<div class="empty">
+  <h3>Todavía no hay metas</h3>
+  <p>Una meta puede ser en pareja o personal, con un objetivo opcional.</p>
+  <a class="btn btn-secondary" href="/goals/new">Nueva meta</a>
+</div>
 {{end}}
-</ul>
 {{end}}

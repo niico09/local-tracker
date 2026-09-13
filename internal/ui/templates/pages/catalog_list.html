@@ -1,18 +1,26 @@
 {{define "content"}}
-<div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-  <h1 class="text-xl font-semibold sm:text-2xl">Catalog</h1>
-  <a class="text-emerald-400 hover:text-emerald-300" href="/catalog/new">Add item</a>
+<div class="page-head">
+  <div><p class="eyebrow">Catálogo · {{len .Items}} títulos</p><h1>Catálogo</h1></div>
+  <div class="page-actions"><a class="btn btn-primary" href="/catalog/new" data-od-id="cta-add-item">Añadir título</a></div>
 </div>
-{{if .Error}}<p class="text-red-400">{{.Error}}</p>{{end}}
-<ul class="flex flex-col gap-3">
-{{range .Items}}
-  <li class="flex flex-col gap-2 rounded border border-slate-800 p-3 sm:flex-row sm:items-center sm:gap-4">
-    {{if .CoverURL}}<img src="{{.CoverURL}}" alt="" class="h-16 w-16 rounded object-cover">{{end}}
-    <a class="truncate font-medium hover:text-emerald-300" href="/catalog/{{.ID}}">{{.Title}}</a>
-    <span class="text-sm text-slate-400">{{.Kind}}{{if .Year}} ({{.Year}}){{end}}</span>
-  </li>
+{{if .Error}}<p class="alert" role="alert">{{.Error}}</p>{{end}}
+{{if .Items}}
+<div class="toolbar" id="lt-toolbar" hidden></div>
+<div class="grid-covers" id="lt-covers">
+  {{range .Items}}
+  <a class="item-card" href="/catalog/{{.ID}}" data-kind="{{.Kind}}" data-title="{{.Title}}" data-created="{{.CreatedAt.Unix}}">
+    <span class="mount"><span class="cover-box">{{if .CoverURL}}<img src="{{.CoverURL}}" alt="Portada de {{.Title}}" loading="lazy">{{else}}<span class="cover-fallback" aria-hidden="true"><span class="cf-mark">{{template "ui-mark"}}</span><span class="cf-title">{{.Title}}</span><span class="cf-foot">Sin portada</span></span>{{end}}</span></span>
+    <span class="item-title">{{.Title}}</span>
+    <span class="item-meta">{{template "ui-kind" .Kind}}{{if .Year}} · {{.Year}}{{end}}</span>
+    <span class="item-tags">{{if .OwnerUserID}}<span class="chip chip-strong">Personal</span>{{end}}</span>
+  </a>
+  {{end}}
+</div>
 {{else}}
-  <li class="text-slate-400">No items yet.</li>
+<div class="empty">
+  <h3>Todavía no hay títulos</h3>
+  <p>Suma la primera serie, película, libro o curso del archivo.</p>
+  <a class="btn btn-secondary" href="/catalog/new">Añadir título</a>
+</div>
 {{end}}
-</ul>
 {{end}}

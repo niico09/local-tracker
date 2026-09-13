@@ -1,10 +1,37 @@
+{{define "layout"}}<!DOCTYPE html>
+<html lang="es">
+<head>{{template "ui-head" .}}</head>
+<body>
+<div class="screen-auth">
+  <section class="auth-poster on-dark" data-od-id="auth-poster">
+    {{template "ui-brand" "brand-light"}}
+    <p class="poster-line">Dos perfiles, una lista: series, películas, libros y cursos por ver.</p>
+    <p class="poster-foot">Red local · sin nube · uso privado</p>
+  </section>
+  <section class="auth-form-wrap" data-od-id="auth-form">
+    <div class="auth-card">{{template "content" .}}</div>
+  </section>
+</div>
+</body>
+</html>{{end}}
 {{define "content"}}
-<h1 class="text-xl font-semibold">Create the two profiles</h1>
-<form class="flex flex-col gap-3" method="post" action="/setup">
-  <input name="name1" placeholder="Profile 1 name" required>
-  <input name="pin1" type="password" inputmode="numeric" minlength="4" maxlength="12" placeholder="Profile 1 PIN" required>
-  <input name="name2" placeholder="Profile 2 name" required>
-  <input name="pin2" type="password" inputmode="numeric" minlength="4" maxlength="12" placeholder="Profile 2 PIN" required>
-  <button type="submit">Create profiles</button>
+<p class="eyebrow">Primer inicio</p>
+<h1>Crea los dos perfiles</h1>
+<p class="lead-sm">Los nombres y los PIN quedan en este dispositivo. Cada perfil firma con su PIN.</p>
+{{if .Error}}<p class="alert" role="alert">{{.Error}}</p>{{end}}
+<form class="auth-form" method="post" action="/setup">
+  <div class="setup-grid">
+    <fieldset class="setup-group">
+      <legend>Perfil 1</legend>
+      <div class="field"><label for="name1">Nombre</label><input class="input" id="name1" name="name1" autocomplete="off" required></div>
+      <div class="field"><label for="pin1">PIN</label><input class="input" id="pin1" name="pin1" type="password" inputmode="numeric" minlength="4" maxlength="12" required></div>
+    </fieldset>
+    <fieldset class="setup-group">
+      <legend>Perfil 2</legend>
+      <div class="field"><label for="name2">Nombre</label><input class="input" id="name2" name="name2" autocomplete="off" required></div>
+      <div class="field"><label for="pin2">PIN</label><input class="input" id="pin2" name="pin2" type="password" inputmode="numeric" minlength="4" maxlength="12" required></div>
+    </fieldset>
+  </div>
+  <button class="btn btn-primary btn-block" type="submit">Crear perfiles</button>
 </form>
 {{end}}

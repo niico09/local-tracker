@@ -1,9 +1,24 @@
 {{define "content"}}
-<h1 class="text-xl font-semibold sm:text-2xl">Dashboard</h1>
-<p class="text-slate-400">Signed in as user {{.UserID}}.</p>
-<div class="flex flex-wrap gap-3">
-  <a class="rounded bg-slate-800 px-3 py-2 hover:bg-slate-700" href="/catalog">Catalog</a>
-  <a class="rounded bg-slate-800 px-3 py-2 hover:bg-slate-700" href="/goals">Goals</a>
+<div class="page-head">
+  <div>
+    <p class="eyebrow">Vista general · Perfil #{{.UserID}}</p>
+    <h1>Panel</h1>
+  </div>
 </div>
-<form method="post" action="/logout"><button class="rounded bg-slate-800 px-3 py-2 hover:bg-slate-700" type="submit">Sign out</button></form>
+<p class="lead-sm">Este es el archivo compartido: series, películas, libros y cursos, con metas para avanzar juntos.</p>
+<div class="home-grid">
+  <a class="home-card" href="/catalog" data-od-id="home-catalog">
+    <span class="home-card-kicker">Colección</span>
+    <span class="home-card-title">Catálogo</span>
+    <span class="home-card-note">Añade títulos, súbeles portada y sigue su progreso.</span>
+    <span class="home-card-cta">Abrir catálogo →</span>
+  </a>
+  <a class="home-card" href="/goals" data-od-id="home-goals">
+    <span class="home-card-kicker">Juntos</span>
+    <span class="home-card-title">Metas</span>
+    <span class="home-card-note">Metas en pareja y personales, con su avance y visibilidad.</span>
+    <span class="home-card-cta">Abrir metas →</span>
+  </a>
+</div>
+<p class="home-note">¿Algo nuevo para la lista? <a class="linklike" href="/catalog/new">Añade un título</a>.</p>
 {{end}}

@@ -1,22 +1,38 @@
 {{define "layout"}}<!DOCTYPE html>
-<html lang="en" class="h-full">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#020617">
-<title>{{.Title}}</title>
-<link rel="manifest" href="/manifest.webmanifest">
-<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/static/app.css">
-</head>
-<body class="min-h-full bg-slate-950 text-slate-100 antialiased">
-<header class="border-b border-slate-800">
-  <nav class="mx-auto flex max-w-5xl items-center gap-4 px-4 py-3 text-sm sm:px-6">
-    <a class="font-semibold text-emerald-400" href="/">Local Tracker</a>
-    <a class="hover:text-emerald-300" href="/catalog">Catalog</a>
-    <a class="hover:text-emerald-300" href="/goals">Goals</a>
-  </nav>
-</header>
-<main class="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6 sm:px-6">{{template "content" .}}</main>
+<html lang="es">
+<head>{{template "ui-head" .}}</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" data-od-id="sidebar">
+    {{template "ui-brand" ""}}
+    <nav class="nav" aria-label="Secciones">
+      <a href="/" data-nav="/">Panel</a>
+      <a href="/catalog" data-nav="/catalog">Catálogo</a>
+      <a href="/goals" data-nav="/goals">Metas</a>
+    </nav>
+    <div class="side-foot">
+      <form method="post" action="/logout"><button class="btn btn-secondary btn-block" type="submit">Cerrar sesión</button></form>
+      <p class="side-note">Datos locales · SQLite</p>
+    </div>
+  </aside>
+  <main class="view">{{template "content" .}}</main>
+</div>
+<script src="/static/app.js" defer></script>
 </body>
 </html>{{end}}
+{{define "ui-head"}}<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f2efeb">
+<title>{{.Title}} · Local Tracker</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/app.css">{{end}}
+{{define "ui-mark"}}<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7.5 5v14M16.5 5v14"/><path d="M3 9.5h4.5M3 14.5h4.5M16.5 9.5H21M16.5 14.5H21"/></svg>{{end}}
+{{define "ui-brand"}}<a class="brand {{.}}" href="/">
+  <span class="brand-mark">{{template "ui-mark"}}</span>
+  <span><span class="brand-name">Local Tracker</span><span class="brand-sub">Archivo compartido</span></span>
+</a>{{end}}
+{{define "ui-kind"}}{{if eq . "series"}}Serie{{else if eq . "movie"}}Película{{else if eq . "book"}}Libro{{else if eq . "course"}}Curso{{else}}{{.}}{{end}}{{end}}
+{{define "ui-state-label"}}{{if eq . "pending"}}Pendiente{{else if eq . "in_progress"}}En curso{{else if eq . "completed"}}Completado{{else}}{{.}}{{end}}{{end}}
+{{define "ui-state"}}{{if .}}<span class="chip" data-state="{{.}}">{{template "ui-state-label" .}}</span>{{else}}<span class="chip" data-state="pending">Pendiente</span>{{end}}{{end}}
+{{define "ui-thumb"}}<a class="thumb-link" href="/catalog/{{.ID}}" tabindex="-1" aria-hidden="true"><span class="thumb">{{if .CoverURL}}<img src="{{.CoverURL}}" alt="" loading="lazy">{{else}}<span class="cover-fallback"><span class="cf-mark">{{template "ui-mark"}}</span></span>{{end}}</span></a>{{end}}

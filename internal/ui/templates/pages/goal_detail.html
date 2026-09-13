@@ -1,67 +1,94 @@
 {{define "content"}}
-{{if .Error}}<p class="text-red-400">{{.Error}}</p>{{end}}
-<h1 class="text-xl font-semibold sm:text-2xl">{{.Goal.Title}}</h1>
-<dl class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm sm:max-w-md">
-  <dt class="text-slate-400">Scope</dt><dd>{{if .Goal.OwnerUserID}}personal{{else}}couple{{end}}</dd>
-  <dt class="text-slate-400">Visibility</dt><dd>{{.Goal.Visibility}}</dd>
-  {{if .Goal.Target}}<dt class="text-slate-400">Target</dt><dd>{{.Goal.Target}}</dd>{{end}}
-</dl>
-
-{{if .Rollup}}<div class="flex items-center gap-3"><span class="text-slate-400">Progress</span>{{template "progress_goal" .}}</div>{{end}}
-
-<h2 class="text-lg font-medium">Items</h2>
+<a class="backlink" href="/goals">← Volver a metas</a>
+{{if .Error}}<p class="alert" role="alert">{{.Error}}</p>{{end}}
+{{if .Goal}}
+<div class="page-head">
+  <div>
+    <p class="eyebrow">{{if .Goal.OwnerUserID}}Meta personal{{else}}Meta en pareja{{end}}{{if and .Goal.OwnerUserID (eq .Goal.Visibility "shared")}} · compartida{{end}}</p>
+    <h1>{{.Goal.Title}}</h1>
+  </div>
+  <div class="page-actions">
+    {{if .Goal.Editable}}<a class="btn btn-secondary" href="/goals/{{.Goal.ID}}/edit">Editar meta</a>{{else}}<span class="chip chip-readonly">Solo lectura</span>{{end}}
+  </div>
+</div>
+{{template "progress_goal" .}}
+{{if and .Goal.OwnerUserID .Goal.Editable}}
+<div class="panel">
+  <h2>Visibilidad</h2>
+  <p class="panel-sub">{{if eq .Goal.Visibility "shared"}}Tu pareja puede leerla en modo solo lectura.{{else}}Solo tú puedes ver esta meta.{{end}}</p>
+  <form class="control-row" method="post" action="/goals/{{.Goal.ID}}/visibility">
+    <div class="field"><label for="visibility">Visibilidad</label>
+      <select class="input" id="visibility" name="visibility">
+        <option value="private"{{if eq .Goal.Visibility "private"}} selected{{end}}>Privada (solo yo)</option>
+        <option value="shared"{{if eq .Goal.Visibility "shared"}} selected{{end}}>Compartida (lectura)</option>
+      </select>
+    </div>
+    <button class="btn btn-secondary" type="submit">Actualizar visibilidad</button>
+  </form>
+</div>
+{{end}}
+<div class="section-sub"><h2>Títulos</h2><span class="count-note">{{len .Members}}</span></div>
 {{if .Members}}
-<ul class="flex flex-col gap-3">
+<ul class="rowlist">
   {{range .Members}}
-  <li class="flex flex-col gap-2 rounded border border-slate-800 p-3">
-    <div class="flex flex-wrap items-center gap-3">
-      {{if .CoverURL}}<img src="{{.CoverURL}}" alt="" class="h-12 rounded object-cover">{{end}}
-      <a class="font-medium hover:text-emerald-300" href="/catalog/{{.ID}}">{{.Title}}</a>
-      <span class="text-sm text-slate-400">{{.Kind}}</span>
-      <span class="text-sm text-slate-400">Tilt: {{if .TiltOwner}}personal{{else}}shared{{end}}</span>
-      {{if .HasTilt}}<span class="text-sm text-slate-400">{{.TiltState}}</span>{{end}}
+  <li class="row-item">
+    {{template "ui-thumb" .}}
+    <div>
+      <a class="row-title" href="/catalog/{{.ID}}">{{.Title}}</a>
+      <div class="row-meta">{{template "ui-kind" .Kind}}{{if .Year}} · {{.Year}}{{end}} · {{if .TiltOwner}}Personal{{else}}Compartido{{end}}</div>
+      {{if $.Goal.Editable}}
+      <div class="member-controls">
+        <form class="member-form" method="post" action="/progress/{{.ID}}/toggle">
+          <input type="hidden" name="goal_id" value="{{$.Goal.ID}}">
+          <button class="btn btn-secondary btn-sm" type="submit">{{if .Done}}Desmarcar{{else}}Marcar hecho{{end}}</button>
+        </form>
+        <form class="member-form" method="post" action="/progress/{{.ID}}/dates">
+          <input type="hidden" name="goal_id" value="{{$.Goal.ID}}">
+          <div class="field"><label for="start-{{.ID}}">Inicio</label><input class="input" id="start-{{.ID}}" name="start" type="date" value="{{.StartDate}}"></div>
+          <div class="field"><label for="end-{{.ID}}">Fin</label><input class="input" id="end-{{.ID}}" name="end" type="date" value="{{.EndDate}}"></div>
+          <label class="check"><input type="checkbox" name="done"{{if .Done}} checked{{end}}> Hecho</label>
+          <button class="btn btn-secondary btn-sm" type="submit">Guardar fechas</button>
+        </form>
+        <form method="post" action="/goals/{{$.Goal.ID}}/items/{{.ID}}/remove">
+          <button class="btn btn-secondary btn-sm" type="submit">Quitar</button>
+        </form>
+      </div>
+      {{else}}
+      {{if or .StartDate .EndDate}}<div class="dated">{{if .StartDate}}{{.StartDate}}{{else}}—{{end}} → {{if .EndDate}}{{.EndDate}}{{else}}—{{end}}</div>{{end}}
+      {{end}}
     </div>
-    {{if $.Goal.Editable}}
-    <div class="flex flex-wrap items-center gap-2">
-      <form method="post" action="/progress/{{.ID}}/toggle">
-        <input type="hidden" name="goal_id" value="{{$.Goal.ID}}">
-        <button class="rounded bg-slate-800 px-3 py-1 hover:bg-slate-700" type="submit">Toggle</button>
-      </form>
-      <form class="flex flex-wrap items-center gap-2" method="post" action="/progress/{{.ID}}/dates">
-        <input type="hidden" name="goal_id" value="{{$.Goal.ID}}">
-        <input class="rounded bg-slate-900 px-2 py-1" type="date" name="start" value="{{.StartDate}}">
-        <input class="rounded bg-slate-900 px-2 py-1" type="date" name="end" value="{{.EndDate}}">
-        <label class="text-sm"><input type="checkbox" name="done"{{if .Done}} checked{{end}}> done</label>
-        <button class="rounded bg-slate-800 px-3 py-1 hover:bg-slate-700" type="submit">Save dates</button>
-      </form>
-      <form method="post" action="/goals/{{$.Goal.ID}}/items/{{.ID}}/remove"><button class="rounded bg-slate-800 px-3 py-1 hover:bg-slate-700" type="submit">Remove</button></form>
+    <div class="row-actions">
+      <span class="chip" data-state="{{if .HasTilt}}{{.TiltState}}{{else}}pending{{end}}" data-owner="{{if .TiltOwner}}personal{{else}}shared{{end}}">{{if .HasTilt}}{{template "ui-state-label" .TiltState}}{{else}}Pendiente{{end}}</span>
     </div>
-    {{end}}
   </li>
   {{end}}
 </ul>
 {{else}}
-<p class="text-slate-400">No items yet.</p>
+<div class="empty">
+  <h3>Meta vacía</h3>
+  <p>Agrega títulos del catálogo para empezar a avanzar.</p>
+</div>
 {{end}}
-
+{{if .Goal.Editable}}{{if .Items}}
+<form class="add-member" method="post" action="/goals/{{.Goal.ID}}/items">
+  <div class="field"><label for="item_id">Agregar del catálogo</label>
+    <select class="input" id="item_id" name="item_id">{{range .Items}}<option value="{{.ID}}">{{.Title}}</option>{{end}}</select>
+  </div>
+  <button class="btn btn-secondary" type="submit">Agregar</button>
+</form>
+{{end}}{{end}}
 {{if .Goal.Editable}}
-{{if .Items}}
-<form class="flex flex-wrap items-center gap-2" method="post" action="/goals/{{.Goal.ID}}/items">
-  <select class="rounded bg-slate-900 px-2 py-1" name="item_id">
-    {{range .Items}}<option value="{{.ID}}">{{.Title}}</option>{{end}}
-  </select>
-  <button class="rounded bg-slate-800 px-3 py-1 hover:bg-slate-700" type="submit">Add item</button>
-</form>
+<div class="form-actions danger-actions">
+  <form method="post" action="/goals/{{.Goal.ID}}/delete" data-confirm="¿Eliminar «{{.Goal.Title}}»? La meta se elimina; los títulos quedan en el catálogo.">
+    <button class="btn btn-secondary" type="submit">Eliminar meta</button>
+  </form>
+</div>
 {{end}}
-<p><a class="text-emerald-400 hover:text-emerald-300" href="/goals/{{.Goal.ID}}/edit">Edit</a></p>
-<form class="flex flex-wrap items-center gap-2" method="post" action="/goals/{{.Goal.ID}}/visibility">
-  <select class="rounded bg-slate-900 px-2 py-1" name="visibility">
-    <option value="private"{{if eq .Goal.Visibility "private"}} selected{{end}}>private</option>
-    <option value="shared"{{if eq .Goal.Visibility "shared"}} selected{{end}}>shared</option>
-  </select>
-  <button class="rounded bg-slate-800 px-3 py-1 hover:bg-slate-700" type="submit">Update visibility</button>
-</form>
-<form method="post" action="/goals/{{.Goal.ID}}/delete"><button class="rounded bg-slate-800 px-3 py-1 hover:bg-slate-700" type="submit">Delete</button></form>
+{{else}}
+<div class="empty">
+  <h3>Meta no disponible</h3>
+  <p>No se pudo cargar esta meta.</p>
+  <a class="btn btn-secondary" href="/goals">Volver a metas</a>
+</div>
 {{end}}
-<p><a class="text-emerald-400 hover:text-emerald-300" href="/goals">Back to goals</a></p>
 {{end}}

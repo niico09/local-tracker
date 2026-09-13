@@ -1,9 +1,27 @@
+{{define "layout"}}<!DOCTYPE html>
+<html lang="es">
+<head>{{template "ui-head" .}}</head>
+<body>
+<div class="screen-auth">
+  <section class="auth-poster on-dark" data-od-id="auth-poster">
+    {{template "ui-brand" "brand-light"}}
+    <p class="poster-line">Cada película, serie y libro que ven juntos, en un solo archivo.</p>
+    <p class="poster-foot">Red local · sin nube · uso privado</p>
+  </section>
+  <section class="auth-form-wrap" data-od-id="auth-form">
+    <div class="auth-card">{{template "content" .}}</div>
+  </section>
+</div>
+</body>
+</html>{{end}}
 {{define "content"}}
-<h1 class="text-xl font-semibold">Sign in</h1>
-{{if .Error}}<p class="text-red-400">{{.Error}}</p>{{end}}
-<form class="flex flex-col gap-3" method="post" action="/login">
-  <input name="name" placeholder="Name" required>
-  <input name="pin" type="password" inputmode="numeric" minlength="4" maxlength="12" placeholder="PIN" required>
-  <button type="submit">Sign in</button>
+<p class="eyebrow">Local Tracker</p>
+<h1>Iniciar sesión</h1>
+<p class="lead-sm">Dos perfiles, un archivo compartido. Entra con tu nombre y tu PIN.</p>
+{{if .Error}}<p class="alert" role="alert">{{.Error}}</p>{{end}}
+<form class="auth-form" method="post" action="/login">
+  <div class="field"><label for="name">Nombre</label><input class="input" id="name" name="name" autocomplete="username" required autofocus></div>
+  <div class="field"><label for="pin">PIN</label><input class="input input-pin" id="pin" name="pin" type="password" inputmode="numeric" minlength="4" maxlength="12" autocomplete="off" required></div>
+  <button class="btn btn-primary btn-block" type="submit">Entrar</button>
 </form>
 {{end}}

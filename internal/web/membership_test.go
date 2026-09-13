@@ -39,7 +39,7 @@ func TestGoalMembershipAddRemoveRoundTrip(t *testing.T) {
 	if !strings.Contains(body, "Dune") {
 		t.Fatalf("goal detail missing member item: %s", body)
 	}
-	if !strings.Contains(body, "Tilt: shared") {
+	if !strings.Contains(body, `data-owner="shared"`) {
 		t.Fatalf("goal detail missing shared tilt: %s", body)
 	}
 	if !strings.Contains(body, removeAction) {
@@ -82,7 +82,7 @@ func TestGoalMembershipReadOnlyPartner(t *testing.T) {
 		t.Fatalf("granted partner GET = %d, want 200", resp.StatusCode)
 	}
 	body := readBody(t, resp)
-	if !strings.Contains(body, "Dune") || !strings.Contains(body, "Tilt: personal") {
+	if !strings.Contains(body, "Dune") || !strings.Contains(body, `data-owner="personal"`) {
 		t.Fatalf("granted partner cannot see members: %s", body)
 	}
 	if strings.Contains(body, "/remove") {

@@ -1,13 +1,13 @@
 {
   "name": "Local Tracker",
   "short_name": "Tracker",
-  "description": "Self-hosted LAN tracker for a two-person shared watch/read list.",
+  "description": "Tracker autoalojado en LAN para la lista compartida de dos personas: series, películas, libros y cursos.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#020617",
-  "theme_color": "#020617",
+  "background_color": "#f2efeb",
+  "theme_color": "#f2efeb",
   "icons": [
     {
       "src": "/static/icon.svg",

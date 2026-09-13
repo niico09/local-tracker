@@ -1,15 +1,25 @@
 {{define "content"}}
-<h1 class="text-xl font-semibold">Edit item</h1>
-{{if .Error}}<p class="text-red-400">{{.Error}}</p>{{end}}
-<form class="flex flex-col gap-3" method="post" action="/catalog/{{.Item.ID}}/edit">
-  <input name="title" placeholder="Title" value="{{.Form.Title}}" required>
-  <select name="kind">
-    {{range .Kinds}}<option value="{{.}}"{{if eq . $.Form.Kind}} selected{{end}}>{{.}}</option>{{end}}
-  </select>
-  <input name="year" inputmode="numeric" placeholder="Year (optional)" value="{{.Form.Year}}">
-  <input name="external_id" placeholder="External id (optional)" value="{{.Form.ExternalID}}">
-  <label class="flex items-center gap-2"><input type="checkbox" name="personal" value="1"{{if .Form.Personal}} checked{{end}}> Personal (only I can see it)</label>
-  <button type="submit">Save changes</button>
+<a class="backlink" href="/catalog">← Volver al catálogo</a>
+<div class="page-head">
+  <div><p class="eyebrow">Catálogo</p><h1>Editar título</h1></div>
+</div>
+{{if .Error}}<p class="alert" role="alert">{{.Error}}</p>{{end}}
+{{if .Item}}
+<form class="form-page" method="post" action="/catalog/{{.Item.ID}}/edit">
+  <div class="field"><label for="title">Título</label><input class="input" id="title" name="title" value="{{.Form.Title}}" required autofocus></div>
+  <div class="form-row">
+    <div class="field"><label for="kind">Tipo</label><select class="input" id="kind" name="kind">{{range .Kinds}}<option value="{{.}}"{{if eq . $.Form.Kind}} selected{{end}}>{{template "ui-kind" .}}</option>{{end}}</select></div>
+    <div class="field"><label for="year">Año (opcional)</label><input class="input" id="year" name="year" inputmode="numeric" value="{{.Form.Year}}"></div>
+  </div>
+  <div class="field"><label for="external_id">Id externo (opcional)</label><input class="input" id="external_id" name="external_id" value="{{.Form.ExternalID}}"></div>
+  <label class="check"><input type="checkbox" name="personal" value="1"{{if .Form.Personal}} checked{{end}}> Personal (solo yo puedo verlo)</label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/catalog/{{.Item.ID}}">Cancelar</a>
+    <button class="btn btn-primary" type="submit">Guardar cambios</button>
+  </div>
 </form>
-<p><a href="/catalog/{{.Item.ID}}">Cancel</a></p>
+{{else}}
+<p class="lead-sm">No se pudo recargar el título para corregirlo. Vuelve al catálogo e inténtalo de nuevo.</p>
+<p><a class="btn btn-secondary" href="/catalog">Volver al catálogo</a></p>
+{{end}}
 {{end}}

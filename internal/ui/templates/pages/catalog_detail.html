@@ -1,21 +1,32 @@
 {{define "content"}}
-{{if .Error}}<p class="text-red-400">{{.Error}}</p>{{end}}
-<h1 class="text-xl font-semibold">{{.Item.Title}}</h1>
-{{if .Item.CoverURL}}<img src="{{.Item.CoverURL}}" alt="" class="h-40 object-cover">{{end}}
-<dl>
-  <dt>Type</dt><dd>{{.Item.Kind}}</dd>
-  {{if .Item.Year}}<dt>Year</dt><dd>{{.Item.Year}}</dd>{{end}}
-  {{if .Item.ExternalID}}<dt>External id</dt><dd>{{.Item.ExternalID}}</dd>{{end}}
-</dl>
-<form method="post" action="/catalog/{{.Item.ID}}/cover" enctype="multipart/form-data">
-  <input type="file" name="cover" accept="image/*" required>
-  <button type="submit">Upload cover</button>
-</form>
-<form method="post" action="/progress/{{.Item.ID}}/toggle"><button type="submit">Toggle tilt</button></form>
-<p class="flex gap-3">
-  <a href="/catalog/{{.Item.ID}}/tilt">Tilt</a>
-  <a href="/catalog/{{.Item.ID}}/edit">Edit</a>
-  <a href="/catalog">Back to catalog</a>
-</p>
-<form method="post" action="/catalog/{{.Item.ID}}/delete"><button type="submit">Delete</button></form>
+<a class="backlink" href="/catalog">← Volver al catálogo</a>
+{{if .Error}}<p class="alert" role="alert">{{.Error}}</p>{{end}}
+<div class="detail-grid">
+  <div class="detail-side">
+    <div class="mount detail-cover">{{if .Item.CoverURL}}<img src="{{.Item.CoverURL}}" alt="Portada de {{.Item.Title}}">{{else}}<span class="cover-fallback" aria-hidden="true"><span class="cf-mark">{{template "ui-mark"}}</span><span class="cf-title">{{.Item.Title}}</span><span class="cf-foot">Sin portada</span></span>{{end}}</div>
+    <form method="post" action="/catalog/{{.Item.ID}}/cover" enctype="multipart/form-data">
+      <div class="field"><label for="cover">Portada</label><input class="input" id="cover" type="file" name="cover" accept="image/*" required></div>
+      <button class="btn btn-secondary btn-block" type="submit">Subir portada</button>
+    </form>
+    <a class="btn btn-secondary" href="/catalog/{{.Item.ID}}/edit">Editar datos</a>
+    <form method="post" action="/catalog/{{.Item.ID}}/delete" data-confirm="¿Eliminar «{{.Item.Title}}»? Se quita del catálogo y de todas las metas.">
+      <button class="btn btn-secondary btn-block" type="submit">Eliminar título</button>
+    </form>
+  </div>
+  <div>
+    <h1 class="detail-title">{{.Item.Title}}</h1>
+    <p class="detail-meta">{{template "ui-kind" .Item.Kind}}{{if .Item.Year}} · {{.Item.Year}}{{end}}{{if .Item.ExternalID}} · Id {{.Item.ExternalID}}{{end}}</p>
+    <div class="detail-tags">
+      {{if .Item.OwnerUserID}}<span class="chip chip-strong">Personal</span>{{else}}<span class="chip">Compartido</span>{{end}}
+    </div>
+    <div class="panel">
+      <h2>Progreso</h2>
+      <p class="panel-sub">El estado se deriva solo: hecho → completado; con fecha de inicio → en curso; sin nada → pendiente.</p>
+      <div class="control-row">
+        <form method="post" action="/progress/{{.Item.ID}}/toggle"><button class="btn btn-secondary" type="submit">Cambiar estado</button></form>
+        <a class="btn btn-secondary" href="/catalog/{{.Item.ID}}/tilt">Ver estado actual</a>
+      </div>
+    </div>
+  </div>
+</div>
 {{end}}

@@ -1,14 +1,22 @@
 {{define "content"}}
-<h1 class="text-xl font-semibold">Edit goal</h1>
-{{if .Error}}<p class="text-red-400">{{.Error}}</p>{{end}}
-<form class="flex flex-col gap-3" method="post" action="/goals/{{.Goal.ID}}/edit">
-  <input name="title" placeholder="Title" value="{{.GoalForm.Title}}" required>
-  <input name="target" inputmode="numeric" placeholder="Target (optional)" value="{{.GoalForm.Target}}">
-  <label><input type="checkbox" name="couple"{{if .GoalForm.Couple}} checked{{end}}> Couple goal</label>
-  <select name="visibility">
-    {{range .Visibilities}}<option value="{{.}}"{{if eq . $.GoalForm.Visibility}} selected{{end}}>{{.}}</option>{{end}}
-  </select>
-  <button type="submit">Save changes</button>
+<a class="backlink" href="/goals">← Volver a metas</a>
+<div class="page-head">
+  <div><p class="eyebrow">Metas</p><h1>Editar meta</h1></div>
+</div>
+{{if .Error}}<p class="alert" role="alert">{{.Error}}</p>{{end}}
+{{if .Goal}}
+<form class="form-page" method="post" action="/goals/{{.Goal.ID}}/edit">
+  <div class="field"><label for="title">Título</label><input class="input" id="title" name="title" value="{{.GoalForm.Title}}" required autofocus></div>
+  <div class="field"><label for="target">Objetivo (opcional)</label><input class="input" id="target" name="target" inputmode="numeric" value="{{.GoalForm.Target}}" placeholder="100"></div>
+  <label class="check"><input type="checkbox" name="couple"{{if .GoalForm.Couple}} checked{{end}}> Meta en pareja</label>
+  <div class="field"><label for="visibility">Visibilidad</label><select class="input" id="visibility" name="visibility">{{range .Visibilities}}<option value="{{.}}"{{if eq . $.GoalForm.Visibility}} selected{{end}}>{{if eq . "private"}}Privada (solo yo){{else}}Compartida (lectura){{end}}</option>{{end}}</select></div>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/goals/{{.Goal.ID}}">Cancelar</a>
+    <button class="btn btn-primary" type="submit">Guardar cambios</button>
+  </div>
 </form>
-<p><a href="/goals/{{.Goal.ID}}">Cancel</a></p>
+{{else}}
+<p class="lead-sm">No se pudo recargar la meta para corregirla. Vuelve a las metas e inténtalo de nuevo.</p>
+<p><a class="btn btn-secondary" href="/goals">Volver a metas</a></p>
+{{end}}
 {{end}}

@@ -1,1 +1,9 @@
-{{define "content"}}{{template "progress_tilt" .}}{{end}}
+{{define "content"}}
+{{if .Tilt}}
+<a class="backlink" href="/catalog/{{.Tilt.ItemID}}">← Volver al título</a>
+<div class="page-head"><div><p class="eyebrow">Progreso</p><h1>Estado del título</h1></div></div>
+{{template "progress_tilt" .}}
+{{else}}
+<div class="empty"><h3>Sin progreso</h3><p>Este título todavía no tiene estado registrado.</p></div>
+{{end}}
+{{end}}

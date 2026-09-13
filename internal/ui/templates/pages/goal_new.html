@@ -1,13 +1,17 @@
 {{define "content"}}
-<h1 class="text-xl font-semibold">Add goal</h1>
-{{if .Error}}<p class="text-red-400">{{.Error}}</p>{{end}}
-<form class="flex flex-col gap-3" method="post" action="/goals">
-  <input name="title" placeholder="Title" value="{{.GoalForm.Title}}" required>
-  <input name="target" inputmode="numeric" placeholder="Target (optional)" value="{{.GoalForm.Target}}">
-  <label><input type="checkbox" name="couple"{{if .GoalForm.Couple}} checked{{end}}> Couple goal</label>
-  <select name="visibility">
-    {{range .Visibilities}}<option value="{{.}}"{{if eq . $.GoalForm.Visibility}} selected{{end}}>{{.}}</option>{{end}}
-  </select>
-  <button type="submit">Create goal</button>
+<a class="backlink" href="/goals">← Volver a metas</a>
+<div class="page-head">
+  <div><p class="eyebrow">Metas</p><h1>Nueva meta</h1></div>
+</div>
+{{if .Error}}<p class="alert" role="alert">{{.Error}}</p>{{end}}
+<form class="form-page" method="post" action="/goals">
+  <div class="field"><label for="title">Título</label><input class="input" id="title" name="title" value="{{.GoalForm.Title}}" required autofocus></div>
+  <div class="field"><label for="target">Objetivo (opcional)</label><input class="input" id="target" name="target" inputmode="numeric" value="{{.GoalForm.Target}}" placeholder="100"></div>
+  <label class="check"><input type="checkbox" name="couple"{{if .GoalForm.Couple}} checked{{end}}> Meta en pareja</label>
+  <div class="field"><label for="visibility">Visibilidad</label><select class="input" id="visibility" name="visibility">{{range .Visibilities}}<option value="{{.}}"{{if eq . $.GoalForm.Visibility}} selected{{end}}>{{if eq . "private"}}Privada (solo yo){{else}}Compartida (lectura){{end}}</option>{{end}}</select></div>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/goals">Cancelar</a>
+    <button class="btn btn-primary" type="submit">Crear meta</button>
+  </div>
 </form>
 {{end}}

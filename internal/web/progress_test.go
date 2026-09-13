@@ -81,7 +81,7 @@ func TestProgressStandaloneToggleDefaultsShared(t *testing.T) {
 	partner := loginAs(t, h, "Linus", "5678")
 
 	body := readBody(t, doRequest(t, partner, h, http.MethodPost, "/progress/"+itemID+"/toggle", nil, true))
-	if !strings.Contains(body, "completed") || !strings.Contains(body, "shared") {
+	if !strings.Contains(body, `data-state="completed"`) || !strings.Contains(body, `data-owner="shared"`) {
 		t.Fatalf("standalone tilt fragment = %q, want completed (shared)", body)
 	}
 	if strings.Contains(body, "<html") {
@@ -99,7 +99,7 @@ func TestProgressDatesDoneNoDatesAndEndBeforeStart(t *testing.T) {
 	dates := "/progress/" + itemID + "/dates"
 
 	body := readBody(t, doRequest(t, h.client, h, http.MethodPost, dates, url.Values{"done": {"on"}}, true))
-	if !strings.Contains(body, "completed") {
+	if !strings.Contains(body, `data-state="completed"`) {
 		t.Fatalf("done-without-dates fragment = %q, want completed", body)
 	}
 
@@ -143,12 +143,12 @@ func TestCatalogTiltFragmentAndFullPage(t *testing.T) {
 	tiltPath := "/catalog/" + itemID + "/tilt"
 
 	body := readBody(t, doRequest(t, h.client, h, http.MethodGet, tiltPath, nil, true))
-	if !strings.Contains(body, "pending") || !strings.Contains(body, "shared") || strings.Contains(body, "<html") {
+	if !strings.Contains(body, `data-state="pending"`) || !strings.Contains(body, `data-owner="shared"`) || strings.Contains(body, "<html") {
 		t.Fatalf("catalog tilt fragment = %q, want pending (shared) only", body)
 	}
 
 	full := readBody(t, doRequest(t, h.client, h, http.MethodGet, tiltPath, nil, false))
-	if !strings.Contains(full, "<html") || !strings.Contains(full, "pending") {
+	if !strings.Contains(full, "<html") || !strings.Contains(full, `data-state="pending"`) {
 		t.Fatalf("catalog tilt full page = %q, want the fragment inside a document", full)
 	}
 }
