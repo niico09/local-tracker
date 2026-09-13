@@ -33,6 +33,7 @@
 </div>
 {{else}}
 <div class="empty">
+  <span class="empty-mark">{{template "ui-mark"}}</span>
   <h3>No quedan {{if eq .Kind "series"}}series{{else}}películas{{end}} por ver</h3>
   <p>Todo lo de esta categoría está completado. Buen trabajo.</p>
   <a class="btn btn-secondary" href="/catalog/new">Añadir título</a>

@@ -66,7 +66,7 @@ func NewServer(deps RouterDeps) (http.Handler, error) {
 	mux.HandleFunc("POST /logout", handleLogout(deps.Auth))
 	// `{$}` matches only the exact root path, so unknown paths 404 instead of
 	// rendering the dashboard.
-	mux.HandleFunc("GET /{$}", handleDashboard(tmpls, deps.Backup != nil))
+	mux.HandleFunc("GET /{$}", handleDashboard(deps.Catalog, deps.Goals, deps.Membership, deps.Progress, tmpls, deps.Backup != nil))
 
 	// Catalog routes. GET /catalog/new is a literal pattern and therefore wins
 	// over GET /catalog/{id} by ServeMux specificity regardless of order.

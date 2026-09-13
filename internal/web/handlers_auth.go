@@ -68,6 +68,14 @@ type pageData struct {
 
 	// Backup
 	CanBackup bool
+
+	// Panel (dashboard)
+	Stats       *dashStats
+	TopGoal     *dashGoal
+	DashGoals   []dashGoal
+	InProgress  []itemView
+	RecentAdded []itemView
+	RecentDone  []dashEntry
 }
 
 func handleSetupGet(auth Auth, tmpls templates) http.HandlerFunc {
@@ -146,12 +154,8 @@ func handleLogout(auth Auth) http.HandlerFunc {
 	}
 }
 
-func handleDashboard(tmpls templates, canBackup bool) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		actor, _ := ActorFrom(r.Context())
-		render(w, tmpls, "dashboard", http.StatusOK, pageData{Title: "Panel", UserID: actor.ID(), CanBackup: canBackup})
-	}
-}
+// handleDashboard lives in handlers_dashboard.go: it needs the catalog, the
+// goals, the membership and the progress collaborators.
 
 // setSessionCookie writes the session cookie. It is HttpOnly and SameSite=Lax,
 // and deliberately not Secure because the app runs on plaintext LAN HTTP.

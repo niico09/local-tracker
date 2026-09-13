@@ -332,6 +332,40 @@ fieldset.setup-group { border: 1px solid var(--border); border-radius: var(--rad
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: color-mix(in oklch, var(--fg) 22%, transparent); border-radius: 999px; border: 3px solid var(--bg); }
 
+/* ── panel rico: portada, contadores, listas ─────────────────────────────── */
+.eyebrow-dark { color: var(--on-dark-dim); }
+.meter-dark { background: color-mix(in oklch, var(--on-dark) 14%, transparent); }
+.meter-dark i { background: var(--on-dark); }
+.btn-outline-light { border-color: var(--on-dark-line); color: var(--on-dark); }
+.btn-arrow::after { content: "→"; transition: transform 0.15s ease; }
+.band { position: relative; overflow: hidden; display: grid; grid-template-columns: 1fr; gap: 20px; padding: 24px 20px; background: var(--fg); color: var(--on-dark); border-radius: var(--radius-lg); box-shadow: inset 0 0 0 1px var(--on-dark-line); }
+.band h2 { font-size: clamp(24px, 6vw, 34px); color: var(--on-dark); margin-bottom: 12px; }
+.band .meter { margin-top: 14px; }
+.band-num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: clamp(34px, 4vw, 48px); line-height: 0.9; letter-spacing: -0.03em; }
+.band-num small { font-size: 0.45em; color: var(--on-dark-dim); margin-left: 2px; }
+.band-right { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px; }
+.strip { display: flex; flex-wrap: wrap; gap: 14px 22px; padding: 16px 0; border-bottom: 1px solid var(--border); margin-bottom: 26px; }
+.strip b { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 600; color: var(--fg); }
+.strip span { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+.panel-grid { display: grid; grid-template-columns: 1fr; gap: 34px; margin-top: 10px; }
+.goal-mini-list { display: flex; flex-direction: column; }
+.goal-mini { display: block; padding: 13px 0; border-top: 1px solid var(--border); }
+.goal-mini:first-child { border-top: 0; }
+.goal-mini-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.goal-mini-title { font-family: var(--font-display); font-size: 16.5px; }
+.goal-mini-meta { display: flex; align-items: center; gap: 12px; margin-top: 9px; }
+.goal-mini-meta .meter { flex: 1; }
+.goal-mini-meta .num { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.log { display: flex; flex-direction: column; }
+.log-row { display: grid; grid-template-columns: 1fr auto; gap: 6px 18px; align-items: baseline; padding: 15px 0; border-top: 1px solid var(--border); }
+.log-row:first-child { border-top: 0; }
+.log-date { grid-column: 1 / -1; }
+.log-date, .log-kind { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+.log-kind { text-align: right; }
+.log-title { font-family: var(--font-display); font-size: 16.5px; }
+.panel-prefs { margin-top: 30px; }
+.empty-mark { display: inline-grid; place-items: center; width: 40px; height: 40px; margin-bottom: 12px; border: 1px solid var(--border); border-radius: 10px; color: var(--muted); }
+
 /* ── responsive ──────────────────────────────────────────────────────────── */
 /* ── tablet: pares de columnas ───────────────────────────────────────────── */
 @media (min-width: 640px) {
@@ -380,6 +414,12 @@ fieldset.setup-group { border: 1px solid var(--border); border-radius: var(--rad
   .poster-line { max-width: 19ch; font-size: clamp(27px, 2.6vw, 38px); }
   .poster-foot { display: block; }
   .auth-form-wrap { align-items: center; padding: 44px 26px; }
+  .band { grid-template-columns: 1fr auto; align-items: end; gap: 28px; padding: 30px 34px; }
+  .band .meter { max-width: 460px; }
+  .band-right { flex-direction: column; align-items: flex-end; }
+  .panel-grid { grid-template-columns: 3fr 2fr; gap: 44px; }
+  .log-row { grid-template-columns: 128px 1fr auto; gap: 18px; }
+  .log-date { grid-column: auto; }
 }
 
 /* efectos de puntero: solo cuando hay puntero real (nada queda pegado en táctil) */
@@ -397,6 +437,10 @@ fieldset.setup-group { border: 1px solid var(--border); border-radius: var(--rad
   .goal-card:hover { border-color: var(--fg); transform: translateY(-2px); }
   .backlink:hover { color: var(--fg); }
   .stars label:hover, .stars label:hover ~ label { color: var(--fg); }
+  .btn-outline-light:hover { border-color: var(--on-dark); background: color-mix(in oklch, var(--on-dark) 14%, transparent); }
+  .btn-arrow:hover::after { transform: translateX(2px); }
+  .goal-mini:hover .goal-mini-title { text-decoration: underline; text-underline-offset: 3px; }
+  .log-row:hover .log-title { text-decoration: underline; text-underline-offset: 3px; }
 }
 
 /* pantallas muy angostas: la barra superior pierde peso */

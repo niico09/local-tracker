@@ -16,7 +16,7 @@
   </div>
   <div>
     <h1 class="detail-title">{{.Item.Title}}</h1>
-    <p class="detail-meta">{{template "ui-kind" .Item.Kind}}{{if .Item.Year}} · {{.Item.Year}}{{end}}{{if .Item.ExternalID}} · Id {{.Item.ExternalID}}{{end}}</p>
+    <p class="detail-meta">{{template "ui-kind" .Item.Kind}}{{if .Item.Year}} · {{.Item.Year}}{{end}}{{if .Item.ExternalID}} · Id {{.Item.ExternalID}}{{end}} · Agregado {{.Item.CreatedAt.Format "02/01/2006"}}</p>
     <div class="detail-tags">
       {{if .Item.OwnerUserID}}<span class="chip chip-strong">Personal</span>{{else}}<span class="chip">Compartido</span>{{end}}
     </div>

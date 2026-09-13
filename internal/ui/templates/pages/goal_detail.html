@@ -65,6 +65,7 @@
 </ul>
 {{else}}
 <div class="empty">
+  <span class="empty-mark">{{template "ui-mark"}}</span>
   <h3>Meta vacía</h3>
   <p>Agrega títulos del catálogo para empezar a avanzar.</p>
 </div>
@@ -86,6 +87,7 @@
 {{end}}
 {{else}}
 <div class="empty">
+  <span class="empty-mark">{{template "ui-mark"}}</span>
   <h3>Meta no disponible</h3>
   <p>No se pudo cargar esta meta.</p>
   <a class="btn btn-secondary" href="/goals">Volver a metas</a>

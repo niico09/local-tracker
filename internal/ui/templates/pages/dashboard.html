@@ -4,25 +4,86 @@
     <p class="eyebrow">Vista general · Perfil #{{.UserID}}</p>
     <h1>Panel</h1>
   </div>
+  <div class="page-actions">
+    <a class="btn btn-secondary" href="/ruleta">¿Qué vemos hoy?</a>
+    <a class="btn btn-secondary" href="/catalog">Ir al catálogo</a>
+  </div>
 </div>
-<p class="lead-sm">Este es el archivo compartido: series, películas, libros y cursos, con metas para avanzar juntos.</p>
-<div class="home-grid">
-  <a class="home-card" href="/catalog" data-od-id="home-catalog">
-    <span class="home-card-kicker">Colección</span>
-    <span class="home-card-title">Catálogo</span>
-    <span class="home-card-note">Añade títulos, súbeles portada y sigue su progreso.</span>
-    <span class="home-card-cta">Abrir catálogo →</span>
-  </a>
-  <a class="home-card" href="/goals" data-od-id="home-goals">
-    <span class="home-card-kicker">Juntos</span>
-    <span class="home-card-title">Metas</span>
-    <span class="home-card-note">Metas en pareja y personales, con su avance y visibilidad.</span>
-    <span class="home-card-cta">Abrir metas →</span>
-  </a>
+{{if .TopGoal}}
+<div class="band" data-od-id="band-top100">
+  <div>
+    <p class="eyebrow eyebrow-dark">Meta en pareja · objetivo {{.TopGoal.Total}}</p>
+    <h2>{{.TopGoal.Title}}</h2>
+    <div class="meter meter-dark" role="img" aria-label="Progreso {{.TopGoal.Done}} de {{.TopGoal.Total}}"><i data-pct="{{.TopGoal.Percent}}"></i></div>
+  </div>
+  <div class="band-right">
+    <div class="band-num"><span>{{.TopGoal.Done}}</span><small>/{{.TopGoal.Total}}</small></div>
+    <a class="btn btn-outline-light btn-arrow" href="/goals/{{.TopGoal.ID}}">Ver meta</a>
+  </div>
 </div>
-<p class="home-note">¿Algo nuevo para la lista? <a class="linklike" href="/catalog/new">Añade un título</a> · ¿sin decidir? Prueba la <a class="linklike" href="/ruleta">ruleta</a> · ¿nostalgia? Mira la <a class="linklike" href="/bitacora">bitácora</a>.</p>
+{{end}}
+{{if .Stats}}
+<div class="strip" data-od-id="panel-stats">
+  <span><b>{{.Stats.Total}}</b> títulos visibles</span>
+  <span><b>{{.Stats.Done}}</b> completados</span>
+  <span><b>{{.Stats.Progress}}</b> en curso</span>
+  <span><b>{{.Stats.Pending}}</b> pendientes</span>
+</div>
+{{end}}
+<div class="panel-grid">
+  <div>
+    <div class="section-sub"><h2>En curso</h2><span class="count-note">{{len .InProgress}}{{if eq (len .InProgress) 1}} título{{else}} títulos{{end}}</span></div>
+    {{if .InProgress}}
+    <ul class="rowlist">
+      {{range .InProgress}}
+      <li class="row-item" data-od-id="panel-inprogress-{{.ID}}">
+        {{template "ui-thumb" .}}
+        <div>
+          <a class="row-title" href="/catalog/{{.ID}}">{{.Title}}</a>
+          <div class="row-meta">{{template "ui-kind" .Kind}}{{if .Year}} · {{.Year}}{{end}}</div>
+        </div>
+        <div class="row-actions"><span class="chip" data-state="in_progress">En curso</span></div>
+      </li>
+      {{end}}
+    </ul>
+    {{else}}
+    <div class="empty">
+      <span class="empty-mark">{{template "ui-mark"}}</span>
+      <h3>Nada en curso</h3>
+      <p>Cuando marquen una fecha de inicio, el título aparece aquí.</p>
+    </div>
+    {{end}}
+  </div>
+  <div>
+    <div class="section-sub"><h2>Metas activas</h2><span class="count-note">{{len .DashGoals}}</span></div>
+    <div class="goal-mini-list">
+      {{range .DashGoals}}
+      <a class="goal-mini" href="/goals/{{.ID}}" data-od-id="panel-goal-{{.ID}}">
+        <div class="goal-mini-top"><span class="goal-mini-title">{{.Title}}</span><span class="count-note">{{if .Couple}}En pareja{{else}}Personal{{end}}</span></div>
+        <div class="goal-mini-meta"><div class="meter"><i data-pct="{{.Percent}}"></i></div><span class="num">{{.Done}}/{{.Total}}</span></div>
+      </a>
+      {{end}}
+    </div>
+    <div class="section-sub"><h2>Últimos completados</h2><a class="linklike" href="/bitacora">Ver bitácora</a></div>
+    {{if .RecentDone}}
+    <div class="goal-mini-list">
+      {{range .RecentDone}}
+      <a class="goal-mini" href="/catalog/{{.ID}}"><div class="goal-mini-top"><span class="goal-mini-title">{{.Title}}</span><span class="count-note">{{.DayLabel}}</span></div></a>
+      {{end}}
+    </div>
+    {{else}}
+    <p class="lead-sm">Todavía no completaron nada. La ruleta puede ayudar con la primera decisión.</p>
+    {{end}}
+  </div>
+</div>
+<div class="section-sub"><h2>Recién añadido</h2><a class="linklike" href="/catalog">Ver todo</a></div>
+<div class="log">
+  {{range .RecentAdded}}
+  <a class="log-row" href="/catalog/{{.ID}}"><span class="log-date">{{.CreatedAt.Format "02/01/2006"}}</span><span class="log-title">{{.Title}}</span><span class="log-kind">{{template "ui-kind" .Kind}}</span></a>
+  {{end}}
+</div>
 {{if .CanBackup}}
-<div class="panel" data-od-id="panel-datos">
+<div class="panel panel-prefs" data-od-id="panel-datos">
   <h2>Datos</h2>
   <p class="panel-sub">Todo vive en tu SQLite local, sin nube. Descarga una copia consistente cuando quieras; las portadas se respaldan aparte con <span class="mono">tracker backup -uploads</span>.</p>
   <form method="post" action="/backup"><button class="btn btn-secondary" type="submit">Descargar copia de la base</button></form>

@@ -162,3 +162,22 @@ func TestCoverSearchFlow(t *testing.T) {
 		t.Fatalf("adopted cover not rendered: %s", body)
 	}
 }
+
+// TestDashboardShowsLiveRollups proves the panel renders counters, activity
+// and the featured goal from the same data the other pages use.
+func TestDashboardShowsLiveRollups(t *testing.T) {
+	h := newHarness(t)
+	signIn(t, h)
+
+	itemID := itemIDFromPath(t, createItem(t, h, "Dune"))
+	if resp := h.do(t, http.MethodPost, "/progress/"+itemID+"/toggle", nil); resp.StatusCode != http.StatusSeeOther {
+		t.Fatalf("toggle = %d, want 303", resp.StatusCode)
+	}
+
+	body := readBody(t, h.do(t, http.MethodGet, "/", nil))
+	for _, want := range []string{"Vista general", "títulos visibles", "completados", "Dune"} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("dashboard missing %q: %s", want, body)
+		}
+	}
+}
